@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import nz.co.model.AddressDO;
 import nz.co.service.AddressService;
+import nz.co.utils.JsonData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,10 +29,10 @@ public class AddressController {
     private AddressService addressService;
     @ApiOperation("Query customer address according to address id")
     @GetMapping("/find/{address_id}")
-    public AddressDO detail(@ApiParam(value="Address id",required = true)
-                                @PathVariable("address_id")Long id){
-        return addressService.detail(id);
+    public JsonData detail(@ApiParam(value="Address id",required = true)
+                                @PathVariable("address_id")Long id) {
+        AddressDO addressDO = addressService.detail(id);
+        return JsonData.buildSuccess(addressDO);
     }
-
 }
 
