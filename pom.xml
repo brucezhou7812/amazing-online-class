@@ -36,6 +36,7 @@
 
         <docker.image.prefix>amazing-online-class</docker.image.prefix>
 
+
         <!--跳过单元测试-->
         <skipTests>true</skipTests>
 

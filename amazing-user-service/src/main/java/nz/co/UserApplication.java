@@ -1,5 +1,6 @@
 package nz.co;
 
+import lombok.extern.slf4j.XSlf4j;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
