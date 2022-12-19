@@ -35,7 +35,7 @@
         <springfox.boot.starter.version>3.0.0</springfox.boot.starter.version>
 
         <docker.image.prefix>amazing-online-class</docker.image.prefix>
-
+        <kaptcha.version>1.1.0</kaptcha.version>
 
         <!--跳过单元测试-->
         <skipTests>true</skipTests>
@@ -50,6 +50,11 @@
                 <version>${spring.boot.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>kaptcha-spring-boot-starter</artifactId>
+                <version>${kaptcha.version}</version>
             </dependency>
 
             <!--https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-dependencies/Hoxton.SR8-->
