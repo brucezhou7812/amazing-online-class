@@ -21,6 +21,12 @@ spring:
     properties.mail.smtp.starttls.required: true
     properties.mail.smtp.ssl.enable: true
     default-encoding: UTF-8
+aliyun:
+  oss:
+    endpoint: oss-cn-zhangjiakou.aliyuncs.com
+    access-key-id: LTAI5tMZyJFkTDVMi67yiGJB
+    access-key-sercret: KiXVB9SkKGL2dMp4sMTGL2cCzRY3FB
+    bucketname: onlineclass-bucket
 
 mybatis-plus:
   configuration:
