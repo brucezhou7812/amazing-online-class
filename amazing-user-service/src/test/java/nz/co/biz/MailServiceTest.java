@@ -2,7 +2,7 @@ package nz.co.biz;
 
 import lombok.extern.slf4j.Slf4j;
 import nz.co.UserApplication;
-import nz.co.service.MailService;
+import nz.co.component.MailService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

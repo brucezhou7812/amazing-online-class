@@ -1,9 +1,12 @@
 package nz.co.enums;
+import lombok.Data;
 import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Enum:Error code and Error Message
  */
+
 public enum BizCodeEnum {
     /**
      * General Error code
@@ -23,10 +26,12 @@ public enum BizCodeEnum {
     ACCOUNT_UNREGISTER(250002,"Account Unregister"),
     ACCOUNT_PWD_ERROR(250003,"Error Password");
     @Getter
+    @Setter
     private int code;
     @Getter
+    @Setter
     private String message;
-    private BizCodeEnum(int code,String messge){
+    private BizCodeEnum(int code,String message){
         this.code = code;
         this.message = message;
     }
