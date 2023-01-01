@@ -5,14 +5,12 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import nz.co.enums.BizCodeEnum;
+import nz.co.request.UserRegisterRequest;
 import nz.co.service.FileService;
 import nz.co.utils.JsonData;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.spring.web.json.Json;
 
@@ -36,6 +34,12 @@ public class UserController {
             @ApiParam(value="file",required = true) MultipartFile file){
         String result = fileService.uploadUserImage(file);
         return result!=null?JsonData.buildSuccess(result):JsonData.buildResult(BizCodeEnum.FILE_UPLOAD_USER_IMAGE_FAIL);
+    }
+    @PostMapping(value = "register")
+    @ApiOperation("User reigister")
+    public JsonData register(@RequestBody UserRegisterRequest userRegisterRequest){
+
+        return null;
     }
 }
 

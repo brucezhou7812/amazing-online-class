@@ -2,6 +2,8 @@ package nz.co.service;
 
 import nz.co.model.UserDO;
 import com.baomidou.mybatisplus.extension.service.IService;
+import nz.co.request.UserRegisterRequest;
+import nz.co.utils.JsonData;
 
 /**
  * <p>
@@ -11,6 +13,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @author Bruce Zhou
  * @since 2022-12-04
  */
-public interface UserService extends IService<UserDO> {
-
+public interface UserService{
+    JsonData register(UserRegisterRequest userRegisterRequest);
 }

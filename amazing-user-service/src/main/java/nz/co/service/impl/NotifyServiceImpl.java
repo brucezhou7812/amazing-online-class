@@ -46,4 +46,34 @@ public class NotifyServiceImpl implements NotifyService {
         }
         return JsonData.buildResult(BizCodeEnum.CODE_TO_ERROR);
     }
+
+    private boolean checkExpired(String cacheCode,String code){
+        String ttlString = cacheCode.split("_")[1];
+        long ttl = Long.parseLong(ttlString);
+        long currentTimestamp = CommonUtils.getTimestamp();
+        return (currentTimestamp-ttl)>EXPIREDTIME ?true:false;
+
+    }
+    private boolean checkCodeEqual(String cacheCode,String code){
+        String cacheCodePrefix = cacheCode.split("_")[0];
+        return cacheCodePrefix.equals(code);
+    }
+    @Override
+    public boolean checkCode(SendCodeEnum sendCodeEnum, String to, String code) {
+        String cacheCodeKey = String.format(CACHECODEKEY,SendCodeEnum.REGISTER_CODE.name(),to);
+        String cacheCode = redisTemplate.opsForValue().get(cacheCodeKey);
+        if(!StringUtils.isNullOrEmpty(cacheCode)){
+            redisTemplate.delete(cacheCodeKey);
+            if(!checkCodeEqual(cacheCode,code)){
+                //incoming verification code does not equal to the cached one
+                return false;
+            }else if(checkExpired(cacheCode,code)){
+                //verification code is expired
+                return false;
+            }
+            return true;
+        }else{
+            return false;
+        }
+    }
 }
