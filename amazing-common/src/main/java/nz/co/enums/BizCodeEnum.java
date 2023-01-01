@@ -24,7 +24,13 @@ public enum BizCodeEnum {
      */
     ACCOUNT_REPEAT(250001,"Repetitive Account"),
     ACCOUNT_UNREGISTER(250002,"Account Unregister"),
-    ACCOUNT_PWD_ERROR(250003,"Error Password");
+    ACCOUNT_PWD_ERROR(250003,"Error Password"),
+
+    /**
+     * File error
+     */
+    FILE_UPLOAD_USER_IMAGE_FAIL(610001,"Upload user image fail");
+
     @Getter
     @Setter
     private int code;

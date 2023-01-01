@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @since 2022-12-04
  */
 @RestController
-@Api(tags="Customer Address Moudule")
+@Api(tags="Customer Address Module")
 @RequestMapping("/api/address/v1")
 public class AddressController {
     @Autowired

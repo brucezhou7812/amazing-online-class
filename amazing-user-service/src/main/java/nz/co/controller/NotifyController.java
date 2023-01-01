@@ -28,8 +28,8 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 @RestController
-@RequestMapping("/api/user/v1")
-@Api(tags="Kaptcha API")
+@RequestMapping("/api/notify/v1")
+@Api(tags="Notify Service Module")
 @Slf4j
 public class NotifyController {
     @Autowired

@@ -34,7 +34,7 @@ public class FileServiceImpl implements FileService {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("YYYY/MM/DD");
         String directory = dtf.format(ldt);
         String fileName = CommonUtils.generateUUID();
-        String newFileName = "user/"+directory+"/"+ fileName+"."+extendsion;
+        String newFileName = "user/"+directory+"/"+ fileName+extendsion;
         try {
             PutObjectResult result = ossClient.putObject(bucketname,newFileName,file.getInputStream());
             if(result!=null){
