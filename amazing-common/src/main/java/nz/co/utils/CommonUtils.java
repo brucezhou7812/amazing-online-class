@@ -1,6 +1,13 @@
 package nz.co.utils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
+import nz.co.enums.BizCodeEnum;
+
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.security.MessageDigest;
@@ -8,7 +15,7 @@ import java.util.Random;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
+@Slf4j
 public class CommonUtils {
 
     private static final Pattern MAIL_PATTERN = Pattern.compile("^([a-z0-9A-Z]+[-|\\.]?)+[a-z0-9A-Z]@([a-z0-9A-Z]+(-[a-z0-9A-Z]+)?\\.)+[a-zA-Z]{2,}$");
@@ -37,6 +44,17 @@ public class CommonUtils {
             sb.append(CANDIDATE_STRING.charAt(r.nextInt(CANDIDATE_STRING.length())));
         }
         return sb.toString();
+    }
+    public static void sendJsonMessage(Object message, HttpServletResponse response){
+        ObjectMapper objectMapper = new ObjectMapper();
+        response.setContentType("application/json,charset=utf-8");
+        try (PrintWriter writer = response.getWriter()){
+            String msg = objectMapper.writeValueAsString(message);
+            writer.println(msg);
+            response.flushBuffer();
+        } catch (IOException e) {
+            log.warn("Object Parsing fail: "+message);
+        }
     }
     /**
      * @param email
