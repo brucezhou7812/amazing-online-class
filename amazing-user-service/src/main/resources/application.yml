@@ -25,7 +25,7 @@ aliyun:
   oss:
     endpoint: oss-cn-zhangjiakou.aliyuncs.com
     access-key-id: LTAI5tMZyJFkTDVMi67yiGJB
-    access-key-sercret: KiXVB9SkKGL2dMp4sMTGL2cCzRY3FB
+    access-key-sercret: KiXVB9SkKGL2dMp4sMTGL2cCzRY3FB_b@$B
     bucketname: onlineclass-bucket
 
 mybatis-plus:

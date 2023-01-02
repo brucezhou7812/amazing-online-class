@@ -13,7 +13,7 @@ public class CommonUtils {
 
     private static final Pattern MAIL_PATTERN = Pattern.compile("^([a-z0-9A-Z]+[-|\\.]?)+[a-z0-9A-Z]@([a-z0-9A-Z]+(-[a-z0-9A-Z]+)?\\.)+[a-zA-Z]{2,}$");
     private static final Pattern PHONE_PATTERN = Pattern.compile("^((13[0-9])|(15[^4,\\D])|(18[0,5-9]))\\d{8}$");
-
+    private static final String CANDIDATE_STRING = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
     public static String generateUUID(){
         return UUID.randomUUID().toString();
     }
@@ -29,6 +29,14 @@ public class CommonUtils {
             stringBuffer.append(c);
         }
         return stringBuffer.toString();
+    }
+    public static String getRadomSalt(int length){
+        StringBuilder sb = new StringBuilder();
+        Random r = new Random();
+        for(int i=0;i<length;i++){
+            sb.append(CANDIDATE_STRING.charAt(r.nextInt(CANDIDATE_STRING.length())));
+        }
+        return sb.toString();
     }
     /**
      * @param email

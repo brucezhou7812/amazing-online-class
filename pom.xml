@@ -36,6 +36,7 @@
 
         <docker.image.prefix>amazing-online-class</docker.image.prefix>
         <kaptcha.version>1.1.0</kaptcha.version>
+        <jwt.version>0.9.1</jwt.version>
 
         <!--跳过单元测试-->
         <skipTests>true</skipTests>
@@ -119,6 +120,11 @@
                 <version>${springfox.boot.starter.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt</artifactId>
+                <version>${jwt.version}</version>
+            </dependency>
 
 
         </dependencies>
