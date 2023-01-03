@@ -1,6 +1,7 @@
 package nz.co.service;
 
 import nz.co.model.AddressDO;
+import nz.co.request.AddressAddRequest;
 
 /**
  * <p>
@@ -12,4 +13,6 @@ import nz.co.model.AddressDO;
  */
 public interface AddressService{
     AddressDO detail(Long id);
+
+    AddressDO add(AddressAddRequest addressAddRequest);
 }

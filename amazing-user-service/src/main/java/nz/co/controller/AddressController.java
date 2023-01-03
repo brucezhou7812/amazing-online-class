@@ -6,13 +6,11 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import nz.co.exception.BizCodeException;
 import nz.co.model.AddressDO;
+import nz.co.request.AddressAddRequest;
 import nz.co.service.AddressService;
 import nz.co.utils.JsonData;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * <p>
@@ -37,6 +35,12 @@ public class AddressController {
        // if(id == 1){
          //   throw new BizCodeException(-1,"The address id is 1.");
         //}
+        return JsonData.buildSuccess(addressDO);
+    }
+    @ApiOperation("add an address to receive goods")
+    @PostMapping("add_address")
+    public JsonData addAddress(@ApiParam(value="the address to add",required = true) @RequestBody AddressAddRequest addressAddRequest){
+        AddressDO addressDO = addressService.add(addressAddRequest);
         return JsonData.buildSuccess(addressDO);
     }
 }
