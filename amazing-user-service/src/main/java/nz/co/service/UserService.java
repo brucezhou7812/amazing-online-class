@@ -6,6 +6,7 @@ import nz.co.request.UserLoginRequest;
 import nz.co.request.UserRegisterRequest;
 import nz.co.request.UserTokenRefreshRequest;
 import nz.co.utils.JsonData;
+import nz.co.vo.UserVO;
 
 /**
  * <p>
@@ -21,4 +22,6 @@ public interface UserService{
     JsonData login(UserLoginRequest userLoginRequest);
 
     JsonData refresh(UserTokenRefreshRequest userTokenRefreshRequest);
+
+    UserVO findUserDetail();
 }

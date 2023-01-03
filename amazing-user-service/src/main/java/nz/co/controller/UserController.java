@@ -11,6 +11,7 @@ import nz.co.request.UserTokenRefreshRequest;
 import nz.co.service.FileService;
 import nz.co.service.UserService;
 import nz.co.utils.JsonData;
+import nz.co.vo.UserVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -56,6 +57,13 @@ public class UserController {
     @ApiOperation("Refresh token")
     public JsonData refresh(@RequestBody @ApiParam(value = "User Token Request",required = true) UserTokenRefreshRequest userTokenRefreshRequest){
         return userService.refresh(userTokenRefreshRequest);
+    }
+
+    @GetMapping(value = "detail")
+    @ApiOperation("Get user information")
+    public JsonData detail(){
+        UserVO userVO = userService.findUserDetail();
+        return JsonData.buildSuccess(userVO);
     }
 }
 

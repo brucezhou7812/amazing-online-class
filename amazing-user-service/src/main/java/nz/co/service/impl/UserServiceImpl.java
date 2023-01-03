@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import nz.co.constant.ConstantOnlineClass;
 import nz.co.enums.BizCodeEnum;
 import nz.co.enums.SendCodeEnum;
+import nz.co.interceptor.LoginInterceptor;
 import nz.co.model.UserDO;
 import nz.co.mapper.UserMapper;
 import nz.co.model.UserLoginModel;
@@ -19,6 +20,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import nz.co.utils.CommonUtils;
 import nz.co.utils.JWTUtils;
 import nz.co.utils.JsonData;
+import nz.co.vo.UserVO;
 import org.apache.commons.codec.digest.Md5Crypt;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -121,6 +123,18 @@ public class UserServiceImpl implements UserService {
             return JsonData.buildError("Refresh token not exist.");
         }
 
+    }
+
+    @Override
+    public UserVO findUserDetail() {
+
+        UserLoginModel userLoginModel = LoginInterceptor.threadLocalUserLoginModel.get();
+        QueryWrapper<UserDO> queryWrapper = new QueryWrapper<UserDO>().eq("id",userLoginModel.getId());
+        UserDO userDO = userMapper.selectOne(queryWrapper);
+        UserVO userVO = new UserVO();
+        BeanUtils.copyProperties(userDO,userVO);
+
+        return userVO;
     }
 
     private void userRegisterInitTask(UserDO userDO){
