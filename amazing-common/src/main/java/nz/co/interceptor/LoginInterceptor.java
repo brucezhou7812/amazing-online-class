@@ -1,6 +1,5 @@
 package nz.co.interceptor;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mysql.cj.util.StringUtils;
 import io.jsonwebtoken.Claims;
 import lombok.extern.slf4j.Slf4j;
@@ -21,24 +20,27 @@ public class LoginInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String token = getTokenFromRequest(request);
+        log.info("LoginInterceptor.preHandle(): token:"+token);
         if(StringUtils.isNullOrEmpty(token)){
+            CommonUtils.sendJsonMessage(JsonData.buildResult(BizCodeEnum.ACCOUNT_UNREGISTER),response);
             return false;
         }else{
             Claims claims = JWTUtils.checkToken(token);
             if(claims != null){
                 UserLoginModel userLoginModel = new UserLoginModel();
-                Long id = Long.parseLong((String)claims.get("id"));
+                Integer id1 = (Integer)claims.get("id");
                 String name = (String)claims.get("name");
                 String headImg = (String)claims.get("head_img");
                 String mail = (String)claims.get("mail");
                 userLoginModel.setHeadImg(headImg);
-                userLoginModel.setId(id);
+                userLoginModel.setId(Long.valueOf(id1));
                 userLoginModel.setMail(mail);
                 userLoginModel.setName(name);
                 //request.setAttribute("loginUser",userLoginModel);
                 threadLocalUserLoginModel.set(userLoginModel);
                 return true;
             }else{
+                log.info("LoginInterceptor.preHandle(): token is invalid");
                 CommonUtils.sendJsonMessage(JsonData.buildResult(BizCodeEnum.ACCOUNT_UNREGISTER),response);
                 return false;
             }
