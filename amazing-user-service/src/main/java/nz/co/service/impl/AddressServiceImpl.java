@@ -13,6 +13,7 @@ import nz.co.vo.AddressVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import sun.rmi.runtime.Log;
 
 import java.util.Date;
 import java.util.List;
@@ -35,7 +36,9 @@ public class AddressServiceImpl  implements AddressService {
 private AddressMapper addressMapper;
     @Override
     public AddressVO detail(Long id) {
-        AddressDO addressDO = addressMapper.selectOne(new QueryWrapper<AddressDO>().eq("id",id));
+        UserLoginModel userLoginModel = LoginInterceptor.threadLocalUserLoginModel.get();
+        AddressDO addressDO = addressMapper.selectOne(new QueryWrapper<AddressDO>()
+                .eq("id",id).eq("user_id",userLoginModel.getId()));
         if(addressDO == null) return null;
         AddressVO addressVO = new AddressVO();
         BeanUtils.copyProperties(addressDO,addressVO);
