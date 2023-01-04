@@ -2,6 +2,9 @@ package nz.co.service;
 
 import nz.co.model.AddressDO;
 import nz.co.request.AddressAddRequest;
+import nz.co.vo.AddressVO;
+
+import java.util.List;
 
 /**
  * <p>
@@ -12,7 +15,11 @@ import nz.co.request.AddressAddRequest;
  * @since 2022-12-04
  */
 public interface AddressService{
-    AddressDO detail(Long id);
+    AddressVO detail(Long id);
 
     AddressDO add(AddressAddRequest addressAddRequest);
+
+    int delete(Long address_id);
+
+    List<AddressVO> listAll();
 }

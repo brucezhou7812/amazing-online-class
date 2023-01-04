@@ -27,6 +27,11 @@ public enum BizCodeEnum {
     ACCOUNT_PWD_ERROR(250003,"Error Password"),
 
     /**
+     * address error
+     */
+    ADDRESS_NOT_EXIST(260001,"Address not exist"),
+
+    /**
      * File error
      */
     FILE_UPLOAD_USER_IMAGE_FAIL(610001,"Upload user image fail");

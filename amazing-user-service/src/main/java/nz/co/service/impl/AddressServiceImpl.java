@@ -9,11 +9,14 @@ import nz.co.model.AddressDO;
 import nz.co.model.UserLoginModel;
 import nz.co.request.AddressAddRequest;
 import nz.co.service.AddressService;
+import nz.co.vo.AddressVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 
 /**
@@ -31,10 +34,12 @@ public class AddressServiceImpl  implements AddressService {
 @Autowired
 private AddressMapper addressMapper;
     @Override
-    public AddressDO detail(Long id) {
+    public AddressVO detail(Long id) {
         AddressDO addressDO = addressMapper.selectOne(new QueryWrapper<AddressDO>().eq("id",id));
-
-        return addressDO;
+        if(addressDO == null) return null;
+        AddressVO addressVO = new AddressVO();
+        BeanUtils.copyProperties(addressDO,addressVO);
+        return addressVO;
     }
 
     @Override
@@ -60,5 +65,29 @@ private AddressMapper addressMapper;
             return addressDO;
         }
         return null;
+    }
+
+    @Override
+    public int delete(Long address_id) {
+        UserLoginModel userLoginModel = LoginInterceptor.threadLocalUserLoginModel.get();
+        QueryWrapper<AddressDO> queryWrapper = new QueryWrapper<AddressDO>()
+                .eq("id",address_id)
+                .eq("user_id",userLoginModel.getId());
+        int row = addressMapper.delete(queryWrapper);
+        return row;
+    }
+
+    @Override
+    public List<AddressVO> listAll() {
+        UserLoginModel userLoginModel = LoginInterceptor.threadLocalUserLoginModel.get();
+        QueryWrapper<AddressDO> queryWrapper = new QueryWrapper<AddressDO>()
+                .eq("user_id",userLoginModel.getId());
+        List<AddressDO> addressDOList = addressMapper.selectList(queryWrapper);
+        List<AddressVO> addressVOList = addressDOList.stream().map(obj->{
+            AddressVO addressVO = new AddressVO();
+            BeanUtils.copyProperties(obj,addressVO);
+            return addressVO;
+        }).collect(Collectors.toList());
+        return addressVOList;
     }
 }

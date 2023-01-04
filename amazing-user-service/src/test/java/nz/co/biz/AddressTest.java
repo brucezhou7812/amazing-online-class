@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import nz.co.UserApplication;
 import nz.co.service.AddressService;
 import nz.co.model.AddressDO;
+import nz.co.vo.AddressVO;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,7 +20,7 @@ public class AddressTest {
     private AddressService addressService;
     @Test
     public void testAddressDetail(){
-        AddressDO addressDo = addressService.detail(1L);
+        AddressVO addressDo = addressService.detail(1L);
         log.info("print addressDO");
         log.info(addressDo.toString());
         Assert.assertNotEquals(addressDo,null);
