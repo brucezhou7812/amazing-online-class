@@ -6,4 +6,7 @@ public class ConstantOnlineClass {
     public static final Long EXPIRE_TIME_FOR_ACCESS_TOKEN = 1000*60*60*24*7L;
     public static final String KEY_IN_REDIS_REFRESH_TOKEN = "UserService:refreshToken:%s";
     public static final String KEY_IN_REDIS_VERIFICATION_CODE = "NotifyService:VerificationCode:%s:%s";
+    public static final String PAGINATION_TOTAL_PAGES = "total_page";
+    public static final String PAGINATION_TOTAL_RECORDS = "total_record";
+    public static final String PAGINATION_CURRENT_DATA = "current_data";
 }

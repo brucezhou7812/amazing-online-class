@@ -31,10 +31,12 @@ public enum BizCodeEnum {
      */
     ADDRESS_NOT_EXIST(260001,"Address not exist"),
 
+    COUPON_NOT_EXIST(270001,"Coupon not exist"),
     /**
      * File error
      */
     FILE_UPLOAD_USER_IMAGE_FAIL(610001,"Upload user image fail");
+
 
     @Getter
     @Setter
