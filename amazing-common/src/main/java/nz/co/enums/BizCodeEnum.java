@@ -32,6 +32,7 @@ public enum BizCodeEnum {
     ADDRESS_NOT_EXIST(260001,"Address not exist"),
 
     COUPON_NOT_EXIST(270001,"Coupon not exist"),
+    COUPON_EXCEED_USER_LIMIT(270002,"Coupon exceeds user limit"),
     /**
      * File error
      */
