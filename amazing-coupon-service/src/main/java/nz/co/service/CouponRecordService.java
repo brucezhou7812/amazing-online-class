@@ -2,6 +2,7 @@ package nz.co.service;
 
 import nz.co.model.CouponRecordDO;
 import com.baomidou.mybatisplus.extension.service.IService;
+import nz.co.vo.CouponRecordVO;
 
 import java.util.Map;
 
@@ -16,4 +17,6 @@ import java.util.Map;
 public interface CouponRecordService {
 
     Map<String, Object> page(int page, int size);
+
+    CouponRecordVO findRecordById(int record_id);
 }

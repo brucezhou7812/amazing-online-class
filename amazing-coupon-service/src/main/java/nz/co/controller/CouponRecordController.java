@@ -4,14 +4,13 @@ package nz.co.controller;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import nz.co.enums.BizCodeEnum;
 import nz.co.service.CouponRecordService;
 import nz.co.service.CouponService;
 import nz.co.utils.JsonData;
+import nz.co.vo.CouponRecordVO;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,13 +30,20 @@ public class CouponRecordController {
     @Autowired
     private CouponRecordService couponRecordService;
 
-    @RequestMapping("page")
+    @GetMapping("page")
     @ApiOperation("List Coupon Records page by page")
     public JsonData page(@ApiParam("Current page number") @RequestParam(value = "page",defaultValue = "1") int page,
                          @ApiParam("How many records in a page") @RequestParam(value = "size",defaultValue = "10")int size){
         Map<String,Object> pageResult = new HashMap<String,Object>(3);
         pageResult = couponRecordService.page(page,size);
         return JsonData.buildSuccess(pageResult);
+    }
+
+    @GetMapping("detail/{record_id}")
+    @ApiOperation("Query coupon record detail information")
+    public JsonData detail(@ApiParam("Coupon record id")@PathVariable("record_id") int record_id){
+        CouponRecordVO couponRecordVO = couponRecordService.findRecordById(record_id);
+        return couponRecordVO != null ? JsonData.buildSuccess(couponRecordVO):JsonData.buildResult(BizCodeEnum.COUPON_NOT_EXIST);
     }
 
 }
