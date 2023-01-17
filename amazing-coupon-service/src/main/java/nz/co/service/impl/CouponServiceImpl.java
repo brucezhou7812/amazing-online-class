@@ -72,7 +72,7 @@ public class CouponServiceImpl implements CouponService {
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED,isolation = Isolation.READ_COMMITTED)
+    @Transactional(rollbackFor = Exception.class,propagation = Propagation.REQUIRED,isolation = Isolation.READ_COMMITTED)
     public CouponRecordDO recevieCoupon(Long coupon_id) {
         UserLoginModel userLoginModel = LoginInterceptor.threadLocalUserLoginModel.get();
         Long userId = userLoginModel.getId();

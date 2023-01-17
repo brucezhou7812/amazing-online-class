@@ -1,9 +1,20 @@
 package nz.co.controller;
 
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import nz.co.service.CouponRecordService;
+import nz.co.service.CouponService;
+import nz.co.utils.JsonData;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * <p>
@@ -14,8 +25,20 @@ import org.springframework.web.bind.annotation.RestController;
  * @since 2023-01-05
  */
 @RestController
-@RequestMapping("/couponRecordDO")
+@RequestMapping("/api/couponrecord/v1")
+@Api(tags="Coupon Record Service")
 public class CouponRecordController {
+    @Autowired
+    private CouponRecordService couponRecordService;
+
+    @RequestMapping("page")
+    @ApiOperation("List Coupon Records page by page")
+    public JsonData page(@ApiParam("Current page number") @RequestParam(value = "page",defaultValue = "1") int page,
+                         @ApiParam("How many records in a page") @RequestParam(value = "size",defaultValue = "10")int size){
+        Map<String,Object> pageResult = new HashMap<String,Object>(3);
+        pageResult = couponRecordService.page(page,size);
+        return JsonData.buildSuccess(pageResult);
+    }
 
 }
 
