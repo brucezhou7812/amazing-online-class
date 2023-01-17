@@ -4,14 +4,18 @@ package nz.co.controller;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import lombok.extern.slf4j.Slf4j;
 import nz.co.enums.BizCodeEnum;
 import nz.co.model.CouponRecordDO;
 import nz.co.service.CouponService;
 import nz.co.utils.JsonData;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * <p>
@@ -24,7 +28,10 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/coupon/v1")
 @Api(tags="Coupon service")
+@Slf4j
 public class CouponController {
+    @Autowired
+    private RedissonClient redissonClient;
     @Autowired
     private CouponService couponService;
     @GetMapping("list_coupon_inpage")
@@ -42,6 +49,20 @@ public class CouponController {
          CouponRecordDO couponRecordDO = couponService.recevieCoupon(coupon_id);
         return JsonData.buildSuccess(couponRecordDO);
     }
+    @GetMapping("lock")
+    public JsonData testLock(){
+        RLock rLock = redissonClient.getLock("lock:coupon:1");
+        rLock.lock();
+        try{
+            log.info("succeed to lock :"+Thread.currentThread().getId());
+            TimeUnit.SECONDS.sleep(20);
+        }catch (Exception e){
 
+        }finally {
+            log.info("succeed to unlock :"+Thread.currentThread().getId());
+            rLock.unlock();
+        }
+        return JsonData.buildSuccess(Thread.currentThread().getId());
+    }
 }
 

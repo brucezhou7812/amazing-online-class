@@ -20,10 +20,15 @@ import nz.co.service.CouponService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import nz.co.utils.CommonUtils;
 import nz.co.vo.CouponVO;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.QueryMethod;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -47,6 +52,8 @@ public class CouponServiceImpl implements CouponService {
     private CouponMapper couponMapper;
     @Autowired
     private CouponRecordMapper couponRecordMapper;
+    @Autowired
+    private RedissonClient redissonClient;
     @Override
     public Map<String, Object> listCouponInPage(int pages, int size) {
         Page<CouponDO> pageinfo = new Page<CouponDO>(pages,size);
@@ -65,28 +72,39 @@ public class CouponServiceImpl implements CouponService {
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRED,isolation = Isolation.READ_COMMITTED)
     public CouponRecordDO recevieCoupon(Long coupon_id) {
         UserLoginModel userLoginModel = LoginInterceptor.threadLocalUserLoginModel.get();
         Long userId = userLoginModel.getId();
-        CouponDO couponDO;
-        QueryWrapper<CouponDO> queryWrapper = new QueryWrapper<CouponDO>()
-                .eq("id",coupon_id)
-                .eq("category",CouponCategoryEnum.COUPON_CATEGORY_PROMOTION.getDesc());
-        couponDO = couponMapper.selectOne(queryWrapper);
-        checkCoupon(couponDO,userId);
-        CouponRecordDO couponRecordDO = new CouponRecordDO();
-        BeanUtils.copyProperties(couponDO,couponRecordDO);
-        couponRecordDO.setId(null);
-        couponRecordDO.setUserId(userId);
-        couponRecordDO.setCreateTime(new Date());
-        couponRecordDO.setUserName((userLoginModel.getName()));
-        couponRecordDO.setUseState(CouponUseStateEnum.COUPON_NEW.getDesc());
-        //decrease stock
-        int row = couponMapper.reduceStock(coupon_id);
-        if(row == 1){
-            couponRecordMapper.insert(couponRecordDO);
+
+        String lockKey = "lock:coupon:"+coupon_id;
+        RLock rLock = redissonClient.getLock(lockKey);
+        rLock.lock();
+        log.info("Get the lock successfully.");
+        try{
+
+            QueryWrapper<CouponDO> queryWrapper = new QueryWrapper<CouponDO>()
+                    .eq("id", coupon_id)
+                    .eq("category", CouponCategoryEnum.COUPON_CATEGORY_PROMOTION.getDesc());
+            CouponDO couponDO = couponMapper.selectOne(queryWrapper);
+            checkCoupon(couponDO, userId);
+            CouponRecordDO couponRecordDO = new CouponRecordDO();
+            BeanUtils.copyProperties(couponDO, couponRecordDO);
+            couponRecordDO.setId(null);
+            couponRecordDO.setUserId(userId);
+            couponRecordDO.setCreateTime(new Date());
+            couponRecordDO.setUserName((userLoginModel.getName()));
+            couponRecordDO.setUseState(CouponUseStateEnum.COUPON_NEW.getDesc());
+
+            //decrease stock
+            int row = couponMapper.reduceStock(coupon_id);
+            if (row == 1) {
+                couponRecordMapper.insert(couponRecordDO);
+            }
+            return couponRecordDO;
+        }finally {
+            rLock.unlock();
         }
-        return couponRecordDO;
     }
     private void checkCoupon(CouponDO couponDO,Long userId){
         if(couponDO == null){
