@@ -16,6 +16,7 @@ import nz.co.model.CouponDO;
 import nz.co.mapper.CouponMapper;
 import nz.co.model.CouponRecordDO;
 import nz.co.model.UserLoginModel;
+import nz.co.requst.NewUserRequest;
 import nz.co.service.CouponService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import nz.co.utils.CommonUtils;
@@ -30,9 +31,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
@@ -73,7 +72,7 @@ public class CouponServiceImpl implements CouponService {
 
     @Override
     @Transactional(rollbackFor = Exception.class,propagation = Propagation.REQUIRED,isolation = Isolation.READ_COMMITTED)
-    public CouponRecordDO recevieCoupon(Long coupon_id) {
+    public CouponRecordDO recevieCoupon(Long coupon_id,CouponCategoryEnum category) {
         UserLoginModel userLoginModel = LoginInterceptor.threadLocalUserLoginModel.get();
         Long userId = userLoginModel.getId();
 
@@ -85,12 +84,13 @@ public class CouponServiceImpl implements CouponService {
 
             QueryWrapper<CouponDO> queryWrapper = new QueryWrapper<CouponDO>()
                     .eq("id", coupon_id)
-                    .eq("category", CouponCategoryEnum.COUPON_CATEGORY_PROMOTION.getDesc());
+                    .eq("category", category.getDesc());
             CouponDO couponDO = couponMapper.selectOne(queryWrapper);
             checkCoupon(couponDO, userId);
             CouponRecordDO couponRecordDO = new CouponRecordDO();
             BeanUtils.copyProperties(couponDO, couponRecordDO);
             couponRecordDO.setId(null);
+            couponRecordDO.setCouponId(coupon_id);
             couponRecordDO.setUserId(userId);
             couponRecordDO.setCreateTime(new Date());
             couponRecordDO.setUserName((userLoginModel.getName()));
@@ -106,6 +106,27 @@ public class CouponServiceImpl implements CouponService {
             rLock.unlock();
         }
     }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class,propagation = Propagation.REQUIRED)
+    public List<CouponRecordDO> receiveInitCoupon(NewUserRequest newUserRequest, CouponCategoryEnum couponCategoryNewUser) {
+        UserLoginModel userLoginModel = new UserLoginModel();
+        Long userId = newUserRequest.getUserId();
+        userLoginModel.setId(userId);
+        userLoginModel.setName(newUserRequest.getName());
+        LoginInterceptor.threadLocalUserLoginModel.set(userLoginModel);
+        List<CouponRecordDO> result = new ArrayList<>();
+        QueryWrapper<CouponDO> queryWrapper = new QueryWrapper<CouponDO>()
+                .eq("category",couponCategoryNewUser.getDesc());
+        List<CouponDO> couponDOList = couponMapper.selectList(queryWrapper);
+        for(CouponDO couponDO:couponDOList){
+
+            CouponRecordDO couponRecordDO = recevieCoupon(couponDO.getId(),couponCategoryNewUser);
+            result.add(couponRecordDO);
+        }
+        return result.isEmpty()? null:result;
+    }
+
     private void checkCoupon(CouponDO couponDO,Long userId){
         if(couponDO == null){
             throw new BizCodeException(BizCodeEnum.COUPON_NOT_EXIST);
@@ -125,7 +146,7 @@ public class CouponServiceImpl implements CouponService {
         int userLimit = couponRecordMapper.selectCount(new QueryWrapper<CouponRecordDO>()
         .eq("user_id",userId)
         .eq("coupon_id",couponDO.getId()));
-        if(userLimit > couponDO.getUserLimit()){
+        if(userLimit >= couponDO.getUserLimit()){
             throw new BizCodeException(BizCodeEnum.COUPON_EXCEED_USER_LIMIT);
         }
     }
