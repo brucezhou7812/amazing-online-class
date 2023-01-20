@@ -36,8 +36,12 @@ public enum BizCodeEnum {
     /**
      * File error
      */
-    FILE_UPLOAD_USER_IMAGE_FAIL(610001,"Upload user image fail");
+    FILE_UPLOAD_USER_IMAGE_FAIL(610001,"Upload user image fail"),
 
+    /**
+     * Banner error
+     */
+    BANNER_NOT_EXIST(710001,"Banner not exist");
 
     @Getter
     @Setter

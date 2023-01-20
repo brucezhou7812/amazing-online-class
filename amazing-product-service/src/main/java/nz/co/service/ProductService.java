@@ -1,7 +1,6 @@
 package nz.co.service;
 
-import nz.co.model.ProductDO;
-import com.baomidou.mybatisplus.extension.service.IService;
+
 
 /**
  * <p>

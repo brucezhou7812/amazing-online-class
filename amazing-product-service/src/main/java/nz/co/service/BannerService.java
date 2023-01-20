@@ -1,7 +1,9 @@
 package nz.co.service;
 
-import nz.co.model.BannerDO;
-import com.baomidou.mybatisplus.extension.service.IService;
+
+import nz.co.vo.BannerVO;
+
+import java.util.List;
 
 /**
  * <p>
@@ -13,4 +15,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface BannerService{
 
+    List<BannerVO> list();
 }
