@@ -24,7 +24,7 @@ import java.util.List;
  * @since 2023-01-20
  */
 @RestController
-@Api(tags="Banner Service")
+@Api(tags="Product Service")
 @RequestMapping("/api/banner/v1")
 public class BannerController {
     @Autowired

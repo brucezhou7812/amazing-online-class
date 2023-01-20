@@ -1,4 +1,4 @@
-package nz.co.service;
+package nz.co.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;

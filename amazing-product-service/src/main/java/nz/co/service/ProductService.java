@@ -1,6 +1,7 @@
 package nz.co.service;
 
 
+import java.util.Map;
 
 /**
  * <p>
@@ -12,4 +13,5 @@ package nz.co.service;
  */
 public interface ProductService {
 
+    Map<String, Object> listPageByPage(int page, int size);
 }

@@ -41,7 +41,11 @@ public enum BizCodeEnum {
     /**
      * Banner error
      */
-    BANNER_NOT_EXIST(710001,"Banner not exist");
+    BANNER_NOT_EXIST(710001,"Banner not exist"),
+    /**
+     * product error
+     */
+    PRODUCT_NOT_EXIST(810001,"Product not exist");
 
     @Getter
     @Setter
