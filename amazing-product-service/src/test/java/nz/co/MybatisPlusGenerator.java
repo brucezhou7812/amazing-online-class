@@ -19,7 +19,7 @@ public class MybatisPlusGenerator {
         GlobalConfig config = new GlobalConfig();
         config.setActiveRecord(true)
                 .setAuthor("Bruce Zhou")
-                .setOutputDir("d://code//java//coupon")
+                .setOutputDir("d://code//java//product")
                 .setFileOverride(true)
                 .setIdType(IdType.AUTO)
                 .setDateType(DateType.ONLY_DATE)
@@ -35,7 +35,7 @@ public class MybatisPlusGenerator {
         dsConfig.setDbType(DbType.MYSQL)
                 .setDriverName("com.mysql.cj.jdbc.Driver")
 
-                .setUrl("jdbc:mysql://localhost:3306/amazing_coupon?useSSL=false&&serverTimezone=UTC")
+                .setUrl("jdbc:mysql://localhost:3306/amazing_product?useSSL=false&&serverTimezone=UTC")
                 .setUsername("root")
                 .setPassword("12345678");
 
@@ -55,7 +55,7 @@ public class MybatisPlusGenerator {
 
                 // 生成的表, 支持多表一起生成，以数组形式填写
                 //TODO  TODO  TODO  TODO
-                .setInclude("coupon","coupon_record");
+                .setInclude("product","banner");
 
         //4. 包名策略配置
         PackageConfig pkConfig = new PackageConfig();

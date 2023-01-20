@@ -1,4 +1,4 @@
-package nz.co.service.impl;
+package nz.co.service;
 
 import com.aliyun.oss.OSS;
 import com.aliyun.oss.OSSClient;

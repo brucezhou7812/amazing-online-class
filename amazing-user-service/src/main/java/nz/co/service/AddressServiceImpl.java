@@ -1,4 +1,4 @@
-package nz.co.service.impl;
+package nz.co.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
