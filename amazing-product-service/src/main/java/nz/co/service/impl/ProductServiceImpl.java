@@ -50,7 +50,16 @@ public class ProductServiceImpl  implements ProductService {
         mapPage.put(ConstantOnlineClass.PAGINATION_CURRENT_DATA,current_page);
         return mapPage;
     }
+
+    @Override
+    public ProductVO listProductDetailById(Long product_id) {
+        ProductDO productDO = productMapper.selectById(product_id);
+        return beanProcess(productDO);
+    }
+
     private ProductVO beanProcess(ProductDO productDO){
+        if(productDO == null)
+            return null;
         ProductVO productVO = new ProductVO();
         BeanUtils.copyProperties(productDO,productVO);
         productVO.setStock(productDO.getStock()-productDO.getLockStock());
