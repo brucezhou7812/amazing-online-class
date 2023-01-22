@@ -45,7 +45,11 @@ public enum BizCodeEnum {
     /**
      * product error
      */
-    PRODUCT_NOT_EXIST(810001,"Product not exist");
+    PRODUCT_NOT_EXIST(810001,"Product not exist"),
+    /**
+     * cart error
+     */
+    CART_NOT_EXIST(820001,"Cart not exist");
 
     @Getter
     @Setter

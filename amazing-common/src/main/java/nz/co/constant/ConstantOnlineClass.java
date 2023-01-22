@@ -9,4 +9,5 @@ public class ConstantOnlineClass {
     public static final String PAGINATION_TOTAL_PAGES = "total_page";
     public static final String PAGINATION_TOTAL_RECORDS = "total_record";
     public static final String PAGINATION_CURRENT_DATA = "current_data";
+    public static final String KEY_IN_REDIS_CART="ProductService:cart:%s";
 }
