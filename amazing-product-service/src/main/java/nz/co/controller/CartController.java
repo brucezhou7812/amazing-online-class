@@ -4,9 +4,11 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import nz.co.enums.BizCodeEnum;
+import nz.co.request.UpdateCartRequest;
 import nz.co.service.CartService;
 import nz.co.utils.JsonData;
 import nz.co.request.AddCartRequest;
+import nz.co.vo.CartItemVO;
 import nz.co.vo.CartVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -39,4 +41,19 @@ public class CartController {
         CartVO result = cartService.listCart();
         return result==null?JsonData.buildResult(BizCodeEnum.CART_IS_EMPTY):JsonData.buildSuccess(result);
     }
+
+    @DeleteMapping(value="deleteItem/{product_id}")
+    @ApiOperation(value="delete item from cart")
+    public JsonData deleteItem(@ApiParam(value="product id")@PathVariable("product_id")Long productID){
+        CartItemVO cartItemVO = cartService.deleteItem(productID);
+        return cartItemVO == null ?JsonData.buildResult(BizCodeEnum.PRODUCT_NOT_EXIST):JsonData.buildSuccess(cartItemVO);
+    }
+
+    @PostMapping(value="updateItem")
+    @ApiOperation(value="update item from cart")
+    public JsonData updateItem(@ApiParam(value="update the number of cart item")@RequestBody UpdateCartRequest request){
+        CartItemVO cartItemVO = cartService.updateCart(request);
+        return cartItemVO == null ?JsonData.buildResult(BizCodeEnum.PRODUCT_NOT_EXIST):JsonData.buildSuccess(cartItemVO);
+    }
+
 }

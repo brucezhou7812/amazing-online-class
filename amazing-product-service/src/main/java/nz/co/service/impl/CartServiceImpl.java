@@ -6,6 +6,7 @@ import nz.co.enums.BizCodeEnum;
 import nz.co.exception.BizCodeException;
 import nz.co.interceptor.LoginInterceptor;
 import nz.co.model.UserLoginModel;
+import nz.co.request.UpdateCartRequest;
 import nz.co.service.CartService;
 import nz.co.request.AddCartRequest;
 import nz.co.service.ProductService;
@@ -68,9 +69,19 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
+    public CartItemVO deleteItem(Long productID) {
+        BoundHashOperations<String,Object,Object> myCart = getCart();
+        String strCartItem = (String)myCart.get(Long.toString(productID));
+        CartItemVO cartItemVO = JSON.parseObject(strCartItem,CartItemVO.class);
+        myCart.delete(Long.toString(productID));
+        return cartItemVO;
+    }
+
+    @Override
     public CartVO listCart() {
         BoundHashOperations<String,Object,Object> cart = this.getCart();
         List<Object> stringCartItems = cart.values();
+        if(cart.size() == 0) return null;
         List<String> strProductIds = cart.keys().stream().map(obj->{
             return (String)obj;
         }).collect(Collectors.toList());
@@ -105,6 +116,23 @@ public class CartServiceImpl implements CartService {
         }).collect(Collectors.toList());
     }
 
+
+    @Override
+    public CartItemVO updateCart(UpdateCartRequest request) {
+        if(request == null)
+            return null;
+        Long productId = request.getProductId();
+        Integer buyNum = request.getBuyNum();
+        String strProductId = Long.toString(productId);
+        BoundHashOperations<String,Object,Object> myCart = this.getCart();
+        String strCartItem = (String)myCart.get(strProductId);
+        if(strCartItem == null) return null;
+        CartItemVO cartItem = JSON.parseObject(strCartItem,CartItemVO.class);
+        cartItem.setBuyNum(buyNum);
+        strCartItem = JSON.toJSONString(cartItem);
+        myCart.put(strProductId,strCartItem);
+        return cartItem;
+    }
 
     private String getCartKey() {
         UserLoginModel userLoginModel = LoginInterceptor.threadLocalUserLoginModel.get();
