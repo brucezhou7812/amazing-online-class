@@ -3,6 +3,7 @@ package nz.co.service;
 
 import nz.co.vo.ProductVO;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -18,4 +19,6 @@ public interface ProductService {
     Map<String, Object> listPageByPage(int page, int size);
 
     ProductVO listProductDetailById(Long product_id);
+
+    List<ProductVO> listProductsBatch(List<String> productIds);
 }

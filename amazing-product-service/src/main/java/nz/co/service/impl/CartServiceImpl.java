@@ -10,12 +10,19 @@ import nz.co.service.CartService;
 import nz.co.request.AddCartRequest;
 import nz.co.service.ProductService;
 import nz.co.vo.CartItemVO;
+import nz.co.vo.CartVO;
 import nz.co.vo.ProductVO;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class CartServiceImpl implements CartService {
@@ -54,6 +61,50 @@ public class CartServiceImpl implements CartService {
         }
 
     }
+
+    @Override
+    public void clearCart() {
+        redisTemplate.delete(getCartKey());
+    }
+
+    @Override
+    public CartVO listCart() {
+        BoundHashOperations<String,Object,Object> cart = this.getCart();
+        List<Object> stringCartItems = cart.values();
+        List<String> strProductIds = cart.keys().stream().map(obj->{
+            return (String)obj;
+        }).collect(Collectors.toList());
+        List<CartItemVO> cartItems = stringCartItems.stream().map(obj->{
+            String strCarItems = (String)obj;
+            CartItemVO cartItemVO = JSON.parseObject(strCarItems,CartItemVO.class);
+            return cartItemVO;
+        }).collect(Collectors.toList());
+        checkAndUpdatePrice(cartItems,strProductIds);
+        CartVO cartVO = new CartVO();
+        cartVO.setCartItems(cartItems);
+        cartVO.setUserId(LoginInterceptor.threadLocalUserLoginModel.get().getId());
+        BigDecimal feeToPay = new BigDecimal(0);
+
+        for(CartItemVO cartItemVO:cartItems){
+            feeToPay = feeToPay.add(cartItemVO.getTotalFee());
+        }
+        cartVO.setFeeToPay(feeToPay);
+
+        return cartVO;
+    }
+
+    private void checkAndUpdatePrice(List<CartItemVO> sources,List<String>productIds){
+        List<ProductVO> products = productService.listProductsBatch(productIds);
+        Map<Long,ProductVO> productMap = products.stream().collect(Collectors.toMap(ProductVO::getId, Function.identity()));
+        sources.stream().map(obj->{
+            ProductVO productVO = productMap.get(obj.getProductId());
+            obj.setPrice(productVO.getPrice());
+            obj.setProductTitle(productVO.getTitle());
+            obj.setProductImg(productVO.getCoverImg());
+            return obj;
+        }).collect(Collectors.toList());
+    }
+
 
     private String getCartKey() {
         UserLoginModel userLoginModel = LoginInterceptor.threadLocalUserLoginModel.get();

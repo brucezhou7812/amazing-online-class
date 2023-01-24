@@ -49,7 +49,8 @@ public enum BizCodeEnum {
     /**
      * cart error
      */
-    CART_NOT_EXIST(820001,"Cart not exist");
+    CART_NOT_EXIST(820001,"Cart not exist"),
+    CART_IS_EMPTY(820002,"Cart is empty");
 
     @Getter
     @Setter

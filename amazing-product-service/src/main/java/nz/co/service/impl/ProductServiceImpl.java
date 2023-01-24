@@ -57,6 +57,17 @@ public class ProductServiceImpl  implements ProductService {
         return beanProcess(productDO);
     }
 
+    @Override
+    public List<ProductVO> listProductsBatch(List<String> productIds) {
+        QueryWrapper<ProductDO> queryWrapper = new QueryWrapper<ProductDO>()
+                .in("id",productIds);
+        List<ProductDO> products = productMapper.selectList(queryWrapper);
+        List<ProductVO> productVOS = products.stream().map(obj->{
+            return beanProcess(obj);
+        }).collect(Collectors.toList());
+        return productVOS;
+    }
+
     private ProductVO beanProcess(ProductDO productDO){
         if(productDO == null)
             return null;
