@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@Api(tags="Product service")
+@Api(tags="Product Service")
 @RequestMapping("/api/cart/v1")
 public class CartController {
     @Autowired
@@ -50,7 +50,7 @@ public class CartController {
     }
 
     @PostMapping(value="updateItem")
-    @ApiOperation(value="update item from cart")
+    @ApiOperation(value="update item in cart")
     public JsonData updateItem(@ApiParam(value="update the number of cart item")@RequestBody UpdateCartRequest request){
         CartItemVO cartItemVO = cartService.updateCart(request);
         return cartItemVO == null ?JsonData.buildResult(BizCodeEnum.PRODUCT_NOT_EXIST):JsonData.buildSuccess(cartItemVO);

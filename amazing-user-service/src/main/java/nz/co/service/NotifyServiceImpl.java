@@ -1,4 +1,4 @@
-package nz.co.service.impl;
+package nz.co.service;
 
 import com.mysql.cj.util.StringUtils;
 import nz.co.constant.ConstantOnlineClass;
