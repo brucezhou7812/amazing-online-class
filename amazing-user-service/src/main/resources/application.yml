@@ -21,12 +21,25 @@ spring:
     properties.mail.smtp.starttls.required: true
     properties.mail.smtp.ssl.enable: true
     default-encoding: UTF-8
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 47.92.171.110:8848
 aliyun:
   oss:
     endpoint: oss-cn-zhangjiakou.aliyuncs.com
     access-key-id: LTAI5tMZyJFkTDVMi67yiGJB
     access-key-sercret: KiXVB9SkKGL2dMp4sMTGL2cCzRY3FB_b@$B
     bucketname: onlineclass-bucket
+
+seata:
+  tx-service-group: ${spring.application.name}-group
+  service:
+    grouplist:
+      amazing: 127.0.0.1:8091
+    vgroup-mapping:
+      amazing-user-service-group: amazing
+
 
 mybatis-plus:
   configuration:

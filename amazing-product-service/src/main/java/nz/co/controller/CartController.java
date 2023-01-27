@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@Api(tags="Product Service")
+@Api(tags="Product Service: Cart")
 @RequestMapping("/api/cart/v1")
 public class CartController {
     @Autowired

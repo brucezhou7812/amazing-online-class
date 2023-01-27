@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/api/order/product_order_item")
-@Api(tags = "Product Order Service")
+@Api(tags = "Product Order Service: Order Item")
 public class ProductOrderItemController {
 
 }

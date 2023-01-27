@@ -21,6 +21,10 @@ spring:
     properties.mail.smtp.starttls.required: true
     properties.mail.smtp.ssl.enable: true
     default-encoding: UTF-8
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 47.92.171.110:8848
 aliyun:
   oss:
     endpoint: oss-cn-zhangjiakou.aliyuncs.com

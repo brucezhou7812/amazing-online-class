@@ -13,6 +13,7 @@ import nz.co.service.UserService;
 import nz.co.utils.JsonData;
 import nz.co.vo.UserVO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import org.springframework.web.multipart.MultipartFile;
@@ -43,6 +44,7 @@ public class UserController {
     }
     @PostMapping(value = "register")
     @ApiOperation("User reigister")
+
     public JsonData register(@RequestBody @ApiParam(value="User register Request",required = true) UserRegisterRequest userRegisterRequest){
         return userService.register(userRegisterRequest);
     }

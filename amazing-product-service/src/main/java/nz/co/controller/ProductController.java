@@ -22,7 +22,7 @@ import java.util.Map;
  * @since 2023-01-20
  */
 @RestController
-@Api(tags="Product Service")
+@Api(tags="Product Service: Product")
 @RequestMapping("/api/product/v1")
 public class ProductController {
     @Autowired

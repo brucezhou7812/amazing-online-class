@@ -6,12 +6,6 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 @Data
-@ApiModel(value="The request for adding product to the cart")
-public class AddCartRequest {
-    @ApiModelProperty(value="product id",example = "1")
-    @JsonProperty(value="product_id")
-    private Long productId;
-    @ApiModelProperty(value="the number of products to be bought",example = "2")
-    @JsonProperty(value="buy_num")
-    private Integer buyNum;
+@ApiModel(value="The request for adding product in the cart")
+public class AddCartRequest extends CartRequest {
 }

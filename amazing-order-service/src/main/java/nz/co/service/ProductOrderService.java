@@ -2,6 +2,8 @@ package nz.co.service;
 
 import nz.co.model.ProductOrderDO;
 import com.baomidou.mybatisplus.extension.service.IService;
+import nz.co.request.GenerateOrderRequest;
+import nz.co.utils.JsonData;
 
 /**
  * <p>
@@ -13,4 +15,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface ProductOrderService{
 
+    JsonData generateOrder(GenerateOrderRequest generateOrderRequest);
 }

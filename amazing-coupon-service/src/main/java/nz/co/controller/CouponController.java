@@ -54,7 +54,7 @@ public class CouponController {
         return JsonData.buildSuccess(couponRecordDO);
     }
     @PostMapping("add_new_user_coupon")
-    @ApiOperation("Hand out coupon when the new user registers")
+    @ApiOperation("RPC operation:Hand out coupon when the new user registers")
     public JsonData addNewUserCoupon(@RequestBody @ApiParam(value="the request to register a new user",required = true) NewUserRequest newUserRequest){
         List<CouponRecordDO> couponRecordDOList = couponService.receiveInitCoupon(newUserRequest,CouponCategoryEnum.COUPON_CATEGORY_NEW_USER);
         return couponRecordDOList == null ? JsonData.buildResult(BizCodeEnum.COUPON_NOT_EXIST):JsonData.buildSuccess(couponRecordDOList);
