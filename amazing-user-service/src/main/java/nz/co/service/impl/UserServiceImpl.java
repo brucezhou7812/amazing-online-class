@@ -2,7 +2,6 @@ package nz.co.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.jsonwebtoken.Claims;
-import io.seata.spring.annotation.GlobalTransactional;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import nz.co.constant.ConstantOnlineClass;
@@ -59,7 +58,7 @@ public class UserServiceImpl implements UserService {
     private NotifyService notifyService;
     @Override
    // @Transactional(rollbackFor = Exception.class,propagation = Propagation.REQUIRED)
-    @GlobalTransactional
+   // @GlobalTransactional
     public JsonData register(UserRegisterRequest userRegisterRequest) {
         String email = userRegisterRequest.getMail();
         String code = userRegisterRequest.getCode();
@@ -78,7 +77,6 @@ public class UserServiceImpl implements UserService {
                 int rows = userMapper.insert(userDO);
                 log.info("insert user {} " + rows);
                 userRegisterInitTask(userDO);
-                int i=10/0;
                 return JsonData.buildSuccess();
             }else{
                 return JsonData.buildResult(BizCodeEnum.ACCOUNT_REPEAT);
@@ -151,7 +149,9 @@ public class UserServiceImpl implements UserService {
         NewUserRequest newUserRequest = new NewUserRequest();
         newUserRequest.setName(userDO.getName());
         newUserRequest.setUserId(userDO.getId());
-        couponFeignService.addNewUserCoupon(newUserRequest);
+        JsonData jsonData = couponFeignService.addNewUserCoupon(newUserRequest);
+        if(jsonData.getCode() != 0)
+            throw new RuntimeException("Dispatch coupon failed.");
     }
 
 

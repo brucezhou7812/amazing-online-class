@@ -72,7 +72,7 @@ public class CouponServiceImpl implements CouponService {
 
     @Override
     @Transactional(rollbackFor = Exception.class,propagation = Propagation.REQUIRED)
-    public CouponRecordDO recevieCoupon(Long coupon_id,CouponCategoryEnum category) {
+    public CouponRecordDO receiveCoupon(Long coupon_id,CouponCategoryEnum category) {
         UserLoginModel userLoginModel = LoginInterceptor.threadLocalUserLoginModel.get();
         Long userId = userLoginModel.getId();
 
@@ -121,9 +121,10 @@ public class CouponServiceImpl implements CouponService {
         List<CouponDO> couponDOList = couponMapper.selectList(queryWrapper);
         for(CouponDO couponDO:couponDOList){
 
-            CouponRecordDO couponRecordDO = recevieCoupon(couponDO.getId(),couponCategoryNewUser);
+            CouponRecordDO couponRecordDO = receiveCoupon(couponDO.getId(),couponCategoryNewUser);
             result.add(couponRecordDO);
         }
+        int i =10/0;
         return result.isEmpty()? null:result;
     }
 

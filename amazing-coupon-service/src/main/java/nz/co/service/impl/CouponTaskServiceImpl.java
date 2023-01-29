@@ -15,6 +15,6 @@ import org.springframework.stereotype.Service;
  * @since 2023-01-29
  */
 @Service
-public class CouponTaskServiceImpl extends ServiceImpl<CouponTaskMapper, CouponTaskDO> implements CouponTaskService {
+public class CouponTaskServiceImpl implements CouponTaskService {
 
 }

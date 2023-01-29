@@ -11,6 +11,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @author Bruce Zhou
  * @since 2023-01-29
  */
-public interface CouponTaskService extends IService<CouponTaskDO> {
+public interface CouponTaskService {
 
 }

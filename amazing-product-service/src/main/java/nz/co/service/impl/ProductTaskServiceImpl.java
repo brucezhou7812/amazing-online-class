@@ -15,6 +15,6 @@ import org.springframework.stereotype.Service;
  * @since 2023-01-29
  */
 @Service
-public class ProductTaskServiceImpl extends ServiceImpl<ProductTaskMapper, ProductTaskDO> implements ProductTaskService {
+public class ProductTaskServiceImpl implements ProductTaskService {
 
 }

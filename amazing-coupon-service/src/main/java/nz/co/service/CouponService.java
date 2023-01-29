@@ -22,7 +22,7 @@ public interface CouponService{
 
     Map<String,Object> listCouponInPage(int pages, int size);
 
-    CouponRecordDO recevieCoupon(Long coupon_id, CouponCategoryEnum category);
+    CouponRecordDO receiveCoupon(Long coupon_id, CouponCategoryEnum category);
 
     List<CouponRecordDO> receiveInitCoupon(NewUserRequest newUserRequest, CouponCategoryEnum couponCategoryNewUser);
 }

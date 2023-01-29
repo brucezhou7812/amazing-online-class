@@ -16,6 +16,15 @@ spring:
     nacos:
       discovery:
         server-addr: 47.92.171.110:8848
+  rabbitmq:
+    host: 47.92.171.110
+    port: 5672
+    virtual-host: /
+    password: 123456
+    username: admin
+    listener:
+      simple:
+        acknowledge-mode: manual
 
 
 mybatis-plus:
@@ -25,10 +34,10 @@ logging:
   level:
     root: INFO
 
-seata:
-  tx-service-group: ${spring.application.name}-group
-  service:
-    grouplist:
-      amazing: 127.0.0.1:8091
-    vgroup-mapping:
-      amazing-coupon-service-group: amazing
+#seata:
+#  tx-service-group: ${spring.application.name}-group
+#  service:
+#    grouplist:
+#      amazing: 127.0.0.1:8091
+#    vgroup-mapping:
+#      amazing-coupon-service-group: amazing

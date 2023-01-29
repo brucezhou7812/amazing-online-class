@@ -50,7 +50,7 @@ public class CouponController {
     @ApiOperation("Receive a coupon through coupon id")
     public JsonData recevieCoupon(@ApiParam(value="coupon id")@PathVariable(value = "coupon_id")
                                   Long coupon_id){
-         CouponRecordDO couponRecordDO = couponService.recevieCoupon(coupon_id, CouponCategoryEnum.COUPON_CATEGORY_PROMOTION);
+         CouponRecordDO couponRecordDO = couponService.receiveCoupon(coupon_id, CouponCategoryEnum.COUPON_CATEGORY_PROMOTION);
         return JsonData.buildSuccess(couponRecordDO);
     }
     @PostMapping("add_new_user_coupon")

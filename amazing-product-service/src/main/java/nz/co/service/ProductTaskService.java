@@ -11,6 +11,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @author Bruce Zhou
  * @since 2023-01-29
  */
-public interface ProductTaskService extends IService<ProductTaskDO> {
+public interface ProductTaskService{
 
 }
