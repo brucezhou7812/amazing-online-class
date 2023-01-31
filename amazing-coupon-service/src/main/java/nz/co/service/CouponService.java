@@ -1,11 +1,8 @@
 package nz.co.service;
 
 import nz.co.enums.CouponCategoryEnum;
-import nz.co.model.CouponDO;
-import com.baomidou.mybatisplus.extension.service.IService;
 import nz.co.model.CouponRecordDO;
-import nz.co.requst.NewUserRequest;
-import nz.co.utils.JsonData;
+import nz.co.request.NewUserRequest;
 
 import java.util.List;
 import java.util.Map;

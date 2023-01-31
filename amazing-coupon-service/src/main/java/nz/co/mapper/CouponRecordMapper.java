@@ -2,6 +2,9 @@ package nz.co.mapper;
 
 import nz.co.model.CouponRecordDO;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * <p>
@@ -13,4 +16,5 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  */
 public interface CouponRecordMapper extends BaseMapper<CouponRecordDO> {
 
+    int updateUserStateBatch(@Param(value = "couponIds") List<Long> couponIds,@Param(value="useState") String useState,@Param(value="userId")Long userId);
 }

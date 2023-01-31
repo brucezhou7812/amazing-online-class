@@ -16,4 +16,21 @@
         id, coupon_record_id, create_time, serial_num, lock_state
     </sql>
 
+    <sql id="Base_Column_List_NO_ID">
+        coupon_record_id, create_time, serial_num, lock_state
+    </sql>
+
+    <insert id="insertBatch" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
+        insert into coupon_task (include refid = "Base_Column_List_NO_ID")
+        values
+        <foreach collection="couponTaskDOs" item="couponTask" index="index" separator=",">
+            (
+                #{couponTask.coupon_record_id},
+                #{couponTask.create_time},
+                #{couponTask.serial_num},
+                #{couponTask.lock_state}
+            )
+        </foreach>
+    </insert>
+
 </mapper>

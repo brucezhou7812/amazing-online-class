@@ -10,12 +10,11 @@ import nz.co.enums.CouponCategoryEnum;
 import nz.co.model.CouponRecordDO;
 import nz.co.service.CouponService;
 import nz.co.utils.JsonData;
-import nz.co.requst.NewUserRequest;
+import nz.co.request.NewUserRequest;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import springfox.documentation.spring.web.json.Json;
 
 import java.util.List;
 import java.util.Map;

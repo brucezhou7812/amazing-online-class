@@ -33,6 +33,7 @@ public enum BizCodeEnum {
 
     COUPON_NOT_EXIST(270001,"Coupon not exist"),
     COUPON_EXCEED_USER_LIMIT(270002,"Coupon exceeds user limit"),
+    COUPON_LOCK_FAIL(270003,"Coupon locking failed"),
     /**
      * File error
      */

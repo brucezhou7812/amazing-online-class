@@ -41,3 +41,11 @@ logging:
 #      amazing: 127.0.0.1:8091
 #    vgroup-mapping:
 #      amazing-coupon-service-group: amazing
+
+mqconfig:
+  coupon_release_delay_queue: coupon.release.delay_queue
+  coupon_release_queue: coupon.release.queue
+  coupon_event_exchange: coupon.event.exchange
+  coupon_release_delay_routing_key: coupon.release.delay.routing.key
+  coupon_release_routing_key: coupon.release.routing.key
+  ttl: 15000

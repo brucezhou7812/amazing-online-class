@@ -16,23 +16,19 @@ import nz.co.model.CouponDO;
 import nz.co.mapper.CouponMapper;
 import nz.co.model.CouponRecordDO;
 import nz.co.model.UserLoginModel;
-import nz.co.requst.NewUserRequest;
+import nz.co.request.NewUserRequest;
 import nz.co.service.CouponService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import nz.co.utils.CommonUtils;
 import nz.co.vo.CouponVO;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.query.QueryMethod;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 /**

@@ -5,6 +5,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import nz.co.enums.BizCodeEnum;
+import nz.co.request.LockCouponRecordRequest;
 import nz.co.service.CouponRecordService;
 import nz.co.service.CouponService;
 import nz.co.utils.JsonData;
@@ -45,6 +46,14 @@ public class CouponRecordController {
         CouponRecordVO couponRecordVO = couponRecordService.findRecordById(record_id);
         return couponRecordVO != null ? JsonData.buildSuccess(couponRecordVO):JsonData.buildResult(BizCodeEnum.COUPON_NOT_EXIST);
     }
+    @PostMapping("lock_coupon_record_batch")
+    @ApiOperation("RPC:lock coupon record batch")
+    public JsonData lockCouponRecordBatch(@ApiParam("coupon record ids")@RequestBody LockCouponRecordRequest lockCouponRecordRequest){
+        JsonData jsonData = couponRecordService.lockCouponRecordBatch(lockCouponRecordRequest);
+        return jsonData;
+    }
+
+
 
 }
 
