@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.slf4j.Slf4j;
+import nz.co.config.RabbitMqConfig;
 import nz.co.enums.BizCodeEnum;
 import nz.co.enums.CouponTaskLockStateEnum;
 import nz.co.enums.CouponUseStateEnum;
@@ -12,6 +13,7 @@ import nz.co.interceptor.LoginInterceptor;
 import nz.co.mapper.CouponTaskMapper;
 import nz.co.model.CouponRecordDO;
 import nz.co.mapper.CouponRecordMapper;
+import nz.co.model.CouponRecordMessage;
 import nz.co.model.CouponTaskDO;
 import nz.co.model.UserLoginModel;
 import nz.co.request.LockCouponRecordRequest;
@@ -19,6 +21,7 @@ import nz.co.service.CouponRecordService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import nz.co.utils.JsonData;
 import nz.co.vo.CouponRecordVO;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,6 +31,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -45,6 +49,10 @@ public class CouponRecordServiceImpl implements CouponRecordService {
     private CouponRecordMapper couponRecordMapper;
     @Autowired
     private CouponTaskMapper couponTaskMapper;
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+    @Autowired
+    private RabbitMqConfig rabbitMqConfig;
     @Override
     public Map<String, Object> page(int page, int size) {
         UserLoginModel userLoginModel = LoginInterceptor.threadLocalUserLoginModel.get();
@@ -73,12 +81,12 @@ public class CouponRecordServiceImpl implements CouponRecordService {
     @Override
     public JsonData lockCouponRecordBatch(LockCouponRecordRequest lockCouponRecordRequest) {
         String serialNum = lockCouponRecordRequest.getSerialNum();
-        List<Long> couponIds = lockCouponRecordRequest.getCouponIds();
+        List<Long> couponRecordIds = lockCouponRecordRequest.getCouponRecordIds();
         UserLoginModel userLoginModel = LoginInterceptor.threadLocalUserLoginModel.get();
         if(userLoginModel == null) return null;
         Long userId = userLoginModel.getId();
-        int updateRows = couponRecordMapper.updateUserStateBatch(couponIds, CouponUseStateEnum.COUPON_USED.getDesc(), userId);
-        List<CouponTaskDO> couponTaskDOs = couponIds.stream().map(obj->{
+        int updateRows = couponRecordMapper.updateUserStateBatch(couponRecordIds, CouponUseStateEnum.COUPON_USED.getDesc(), userId);
+        List<CouponTaskDO> couponTaskDOs = couponRecordIds.stream().map(obj->{
             CouponTaskDO couponTask = new CouponTaskDO();
             couponTask.setCouponRecordId(obj);
             couponTask.setCreateTime(new Date());
@@ -87,9 +95,19 @@ public class CouponRecordServiceImpl implements CouponRecordService {
             return couponTask;
         }).collect(Collectors.toList());
         int insertRows = couponTaskMapper.insertBatch(couponTaskDOs);
-        log.info("Success to update batch : "+updateRows);
+        log.info("Success to update use_state in the table of coupon_record batch : "+updateRows);
         log.info("Success to insert coupon task :"+insertRows);
-        if(updateRows == couponIds.size() && updateRows == insertRows){
+        if(updateRows == couponRecordIds.size() && updateRows == insertRows){
+            couponTaskDOs.stream().forEach(new Consumer<CouponTaskDO>(){
+                @Override
+                public void accept(CouponTaskDO couponTask) {
+                    CouponRecordMessage couponRecordMessage = new CouponRecordMessage();
+                    couponRecordMessage.setCouponTaskId(couponTask.getId());
+                    couponRecordMessage.setSerialNum(serialNum);
+                    rabbitTemplate.convertAndSend(rabbitMqConfig.getCouponEventExchange(),rabbitMqConfig.getCouponReleaseDelayRoutingKey(),couponRecordMessage);
+                    log.info("coupon record message send successfully: "+couponRecordMessage.toString());
+                }
+            });
             return JsonData.buildSuccess();
         }else{
             throw new BizCodeException(BizCodeEnum.COUPON_LOCK_FAIL);

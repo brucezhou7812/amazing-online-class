@@ -13,7 +13,7 @@ public class LockCouponRecordRequest {
     @ApiModelProperty(value="the serial number of goods",example = "sdfddss111")
     @JsonProperty("serial_num")
     private String serialNum;
-    @ApiModelProperty(value="the list of coupon id",example = "[1,2,3]")
-    @JsonProperty("coupon_ids")
-    private List<Long> couponIds;
+    @ApiModelProperty(value="the list of coupon record id",example = "[1,2,3]")
+    @JsonProperty("coupon_record_ids")
+    private List<Long> couponRecordIds;
 }

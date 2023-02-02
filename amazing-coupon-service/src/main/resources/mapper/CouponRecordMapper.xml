@@ -25,8 +25,8 @@
     <update id="updateUserStateBatch" >
         update coupon_record set user_state = #{useState} where
         user_id = #{userId} and use_state= 'NEW'
-        and coupon_id in
-        <foreach collection="couponIds" item="id" index="index" separator="," open="(" close=")">
+        and id in
+        <foreach collection="couponRecordIds" item="id" index="index" separator="," open="(" close=")">
            #{id}
         </foreach>
     </update>
