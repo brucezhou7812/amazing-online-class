@@ -2,6 +2,7 @@ package nz.co.service;
 
 import nz.co.model.CouponRecordDO;
 import com.baomidou.mybatisplus.extension.service.IService;
+import nz.co.model.CouponRecordMessage;
 import nz.co.request.LockCouponRecordRequest;
 import nz.co.utils.JsonData;
 import nz.co.vo.CouponRecordVO;
@@ -23,4 +24,6 @@ public interface CouponRecordService {
     CouponRecordVO findRecordById(int record_id);
 
     JsonData lockCouponRecordBatch(LockCouponRecordRequest lockCouponRecordRequest);
+
+    boolean releaseCouponRecord(CouponRecordMessage recordMessage);
 }

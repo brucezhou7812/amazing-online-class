@@ -8,23 +8,26 @@ import nz.co.config.RabbitMqConfig;
 import nz.co.enums.BizCodeEnum;
 import nz.co.enums.CouponTaskLockStateEnum;
 import nz.co.enums.CouponUseStateEnum;
+import nz.co.enums.OrderStateEnum;
 import nz.co.exception.BizCodeException;
+import nz.co.feign.OrderFeignService;
 import nz.co.interceptor.LoginInterceptor;
 import nz.co.mapper.CouponTaskMapper;
-import nz.co.model.CouponRecordDO;
+import nz.co.model.*;
 import nz.co.mapper.CouponRecordMapper;
-import nz.co.model.CouponRecordMessage;
-import nz.co.model.CouponTaskDO;
-import nz.co.model.UserLoginModel;
 import nz.co.request.LockCouponRecordRequest;
 import nz.co.service.CouponRecordService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import nz.co.service.CouponTaskService;
 import nz.co.utils.JsonData;
 import nz.co.vo.CouponRecordVO;
+import nz.co.vo.CouponTaskVO;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import springfox.documentation.spring.web.json.Json;
 
 import java.util.Date;
@@ -49,6 +52,10 @@ public class CouponRecordServiceImpl implements CouponRecordService {
     private CouponRecordMapper couponRecordMapper;
     @Autowired
     private CouponTaskMapper couponTaskMapper;
+    @Autowired
+    private OrderFeignService orderFeignService;
+    @Autowired
+    private CouponTaskService couponTaskService;
     @Autowired
     private RabbitTemplate rabbitTemplate;
     @Autowired
@@ -112,6 +119,52 @@ public class CouponRecordServiceImpl implements CouponRecordService {
         }else{
             throw new BizCodeException(BizCodeEnum.COUPON_LOCK_FAIL);
         }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class,propagation = Propagation.REQUIRED)
+    public boolean releaseCouponRecord(CouponRecordMessage recordMessage) {
+        String serialNo = recordMessage.getSerialNum();
+        Long couponTaskId = recordMessage.getCouponTaskId();
+        CouponTaskDO couponTaskDO = couponTaskService.queryById(couponTaskId);
+        if(couponTaskDO == null){
+            log.warn("Coupon Task Record does not exist or internal error exist: "+recordMessage);
+            return true;
+        }
+        if(CouponTaskLockStateEnum.LOCKED.name().equalsIgnoreCase(couponTaskDO.getLockState())){
+            JsonData orderJsonData = orderFeignService.queryOrderStateBySerialNo(serialNo);
+            if(orderJsonData.getCode() == 0){
+
+                String state = (String)orderJsonData.getData();;
+                if(OrderStateEnum.PAY.name().equalsIgnoreCase(state)){
+                    couponTaskDO.setLockState(CouponTaskLockStateEnum.FINISHED.name());
+                    couponTaskService.updateLockState(couponTaskDO);
+                    log.info("The order has been paid,set coupon task to FINISHED :" +recordMessage);
+                    return true;
+                }if(OrderStateEnum.NEW.name().equalsIgnoreCase(state)){
+                    //couponTaskDO.setLockState(CouponTaskLockStateEnum.CANCELLED.name());
+                    //couponTaskService.updateLockState(couponTaskDO);
+                    log.info("The order has not been paid,return the message to queue :" +recordMessage);
+                    return false;
+                }
+            }
+
+            log.warn("The order does not exist or cancelled,update coupon task to CANCELLED and restore coupon state to NEW:"+recordMessage);
+            couponTaskDO.setLockState(CouponTaskLockStateEnum.CANCELLED.name());
+            couponTaskService.updateLockState(couponTaskDO);
+            updateUseState(couponTaskDO.getCouponRecordId(),CouponUseStateEnum.COUPON_NEW.getDesc());
+
+
+
+        }else{
+            log.warn("The state of Coupon Task Record is not LOCKED: "+recordMessage);
+            return true;
+        }
+
+        return false;
+    }
+    public int updateUseState(Long couponRecordId,String useState){
+        return couponRecordMapper.updateUseState(couponRecordId,useState);
     }
 
     private CouponRecordVO beanProcess(CouponRecordDO couponRecordDO){

@@ -23,12 +23,16 @@
         id, coupon_id, create_time, use_state, user_id, user_name, coupon_title, start_time, end_time, order_id, price, condition_price
     </sql>
     <update id="updateUserStateBatch" >
-        update coupon_record set user_state = #{useState} where
+        update coupon_record set use_state = #{useState} where
         user_id = #{userId} and use_state= 'NEW'
         and id in
         <foreach collection="couponRecordIds" item="id" index="index" separator="," open="(" close=")">
            #{id}
         </foreach>
+    </update>
+    <update id="updateUseState">
+        update coupon_record set use_state = #{useState} where
+        id = #{couponRecordId}
     </update>
 
 </mapper>

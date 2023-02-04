@@ -34,6 +34,7 @@ public enum BizCodeEnum {
     COUPON_NOT_EXIST(270001,"Coupon not exist"),
     COUPON_EXCEED_USER_LIMIT(270002,"Coupon exceeds user limit"),
     COUPON_LOCK_FAIL(270003,"Coupon locking failed"),
+    COUPON_TASK_NOT_EXIST(280001,"Coupon Task Record not exist"),
     /**
      * File error
      */
@@ -51,7 +52,11 @@ public enum BizCodeEnum {
      * cart error
      */
     CART_NOT_EXIST(820001,"Cart not exist"),
-    CART_IS_EMPTY(820002,"Cart is empty");
+    CART_IS_EMPTY(820002,"Cart is empty"),
+    /**
+     * Order error
+     */
+    ORDER_NOT_EXIST(830001,"Order not exist");
 
     @Getter
     @Setter

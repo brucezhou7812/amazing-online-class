@@ -1,9 +1,8 @@
 package nz.co.service;
 
-import nz.co.model.ProductOrderDO;
-import com.baomidou.mybatisplus.extension.service.IService;
 import nz.co.request.GenerateOrderRequest;
 import nz.co.utils.JsonData;
+import nz.co.model.ProductOrderVO;
 
 /**
  * <p>
@@ -16,4 +15,6 @@ import nz.co.utils.JsonData;
 public interface ProductOrderService{
 
     JsonData generateOrder(GenerateOrderRequest generateOrderRequest);
+
+    String queryOrderState(String serialNum);
 }

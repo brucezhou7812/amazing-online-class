@@ -5,18 +5,16 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
+import nz.co.enums.BizCodeEnum;
 import nz.co.enums.OrderClientTypeEnum;
 import nz.co.enums.OrderPayTypeEnum;
 import nz.co.request.GenerateOrderRequest;
 import nz.co.service.ProductOrderService;
 import nz.co.utils.JsonData;
-import org.junit.jupiter.api.Order;
+import nz.co.model.ProductOrderVO;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -75,6 +73,12 @@ public class ProductOrderController {
         } catch (IOException e) {
             log.error("Fail to print html to page");
         }
+    }
+    @GetMapping("list")
+    @ApiOperation("Query the state of the order")
+    public JsonData queryOrderStateBySerialNo(@ApiParam("the serial number of the order")@RequestParam("serial_no")String serialNo){
+        String state = productOrderService.queryOrderState(serialNo);
+        return StringUtils.isBlank(state) ? JsonData.buildResult(BizCodeEnum.ORDER_NOT_EXIST):JsonData.buildSuccess(state);
     }
 }
 
