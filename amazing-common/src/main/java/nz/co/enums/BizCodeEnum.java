@@ -56,7 +56,8 @@ public enum BizCodeEnum {
     /**
      * Order error
      */
-    ORDER_NOT_EXIST(830001,"Order not exist");
+    ORDER_NOT_EXIST(830001,"Order not exist"),
+    ORDER_LOCK_STOCK_FAILED(830002,"Lock stock failed");
 
     @Getter
     @Setter

@@ -29,7 +29,7 @@ import java.io.PrintWriter;
  * @since 2023-01-24
  */
 @RestController
-@RequestMapping("/api/order/product_order")
+@RequestMapping("/api/order/product_order/v1")
 @Api(tags = "Product Order Service: Order")
 @Slf4j
 public class ProductOrderController {

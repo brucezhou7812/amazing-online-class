@@ -47,3 +47,11 @@ mybatis-plus:
 logging:
   level:
     root: INFO
+
+mqconfig:
+  stock_release_delay_queue: stock.release.delay_queue
+  stock_release_queue: stock.release.queue
+  stock_event_exchange: stock.event.exchange
+  stock_release_delay_routing_key: stock.release.delay.routing.key
+  stock_release_routing_key: stock.release.routing.key
+  ttl: 15000

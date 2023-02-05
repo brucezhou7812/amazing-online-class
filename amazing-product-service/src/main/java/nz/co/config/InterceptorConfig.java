@@ -16,7 +16,7 @@ public class InterceptorConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(loginInterceptor())
-            .addPathPatterns("/api/cart/*/**")
+            .addPathPatterns("/api/cart/*/**","/api/product/*/lock_stock")
             .excludePathPatterns("");
         WebMvcConfigurer.super.addInterceptors(registry);
 

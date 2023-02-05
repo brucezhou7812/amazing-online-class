@@ -4,18 +4,27 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import nz.co.constant.ConstantOnlineClass;
+import nz.co.enums.BizCodeEnum;
+import nz.co.enums.ProductTaskLockStateEnum;
+import nz.co.exception.BizCodeException;
 import nz.co.model.ProductDO;
 import nz.co.mapper.ProductMapper;
+import nz.co.model.ProductTaskDO;
+import nz.co.request.LockProductsRequest;
+import nz.co.request.OrderItemRequest;
 import nz.co.service.ProductService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import nz.co.service.ProductTaskService;
 import nz.co.vo.ProductVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -30,6 +39,8 @@ import java.util.stream.Collectors;
 public class ProductServiceImpl  implements ProductService {
     @Autowired
     private ProductMapper productMapper;
+    @Autowired
+    private ProductTaskService productTaskService;
     @Override
     public Map<String, Object> listPageByPage(int page, int size) {
         Page<ProductDO> pageInfo = new Page<ProductDO>(page,size);
@@ -66,6 +77,36 @@ public class ProductServiceImpl  implements ProductService {
             return beanProcess(obj);
         }).collect(Collectors.toList());
         return productVOS;
+    }
+
+    @Override
+    public int lockStock(LockProductsRequest lockProductsRequest) {
+        String serialNo = lockProductsRequest.getSerialNo();
+        List<OrderItemRequest> orderItems = lockProductsRequest.getOrderItems();
+        List<String> productIds = orderItems.stream().map(obj->{
+            Long productId = obj.getProductId();
+            return Long.toString(productId);
+        }).collect(Collectors.toList());
+        List<ProductVO> productVOS = this.listProductsBatch(productIds);
+        Map<Long,ProductVO> productVOMap = productVOS.stream().collect(Collectors.toMap(ProductVO::getId, Function.identity()));
+        for(OrderItemRequest orderItem:orderItems){
+            Long id = orderItem.getProductId();
+            Integer buyNum = orderItem.getBuyNum();
+            int rows = productMapper.lockStock(id,buyNum);
+            if(rows != 1) throw new BizCodeException(BizCodeEnum.ORDER_LOCK_STOCK_FAILED);
+            ProductTaskDO productTaskDO = new ProductTaskDO();
+            productTaskDO.setBuyNum(buyNum);
+            productTaskDO.setCreateTime(new Date());
+            productTaskDO.setProductId(id);
+            productTaskDO.setSerialNum(serialNo);
+            productTaskDO.setProductName(productVOMap.get(id).getDetail());
+            productTaskDO.setLockState(ProductTaskLockStateEnum.LOCKED.name());
+            productTaskService.insert(productTaskDO);
+
+        }
+
+
+        return 0;
     }
 
     private ProductVO beanProcess(ProductDO productDO){

@@ -1,6 +1,7 @@
 package nz.co.service;
 
 
+import nz.co.request.LockProductsRequest;
 import nz.co.vo.ProductVO;
 
 import java.util.List;
@@ -21,4 +22,6 @@ public interface ProductService {
     ProductVO listProductDetailById(Long product_id);
 
     List<ProductVO> listProductsBatch(List<String> productIds);
+
+    int lockStock(LockProductsRequest lockProductsRequest);
 }

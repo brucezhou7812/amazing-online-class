@@ -19,5 +19,9 @@
     <sql id="Base_Column_List">
         id, title, cover_img, detail, price, create_time, old_price, lock_stock, stock
     </sql>
+    <update id="lockStock">
+        update product set lock_stock=lock_stock+#{buyNum}
+        where id=#{id} and stock - lock_stock >=#{buyNum}
+    </update>
 
 </mapper>

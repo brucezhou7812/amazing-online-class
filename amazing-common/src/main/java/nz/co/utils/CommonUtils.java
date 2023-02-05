@@ -47,7 +47,7 @@ public class CommonUtils {
     }
     public static void sendJsonMessage(Object message, HttpServletResponse response){
         ObjectMapper objectMapper = new ObjectMapper();
-        response.setContentType("application/json,charset=utf-8");
+        response.setContentType("application/json;charset=utf-8");
         try (PrintWriter writer = response.getWriter()){
             String msg = objectMapper.writeValueAsString(message);
             writer.println(msg);

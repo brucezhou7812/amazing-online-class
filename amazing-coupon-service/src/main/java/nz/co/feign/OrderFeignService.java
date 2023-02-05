@@ -7,6 +7,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @FeignClient(name="amazing-order-service")
 public interface OrderFeignService {
-    @GetMapping("/api/order/product_order/list")
-    public JsonData queryOrderStateBySerialNo(@RequestParam("serial_no")String serialNo);
+    @GetMapping("/api/order/product_order/v1/list")
+    JsonData queryOrderStateBySerialNo(@RequestParam("serial_no")String serialNo);
 }
