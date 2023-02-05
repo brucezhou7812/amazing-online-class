@@ -6,9 +6,9 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.slf4j.Slf4j;
 import nz.co.config.RabbitMqConfig;
 import nz.co.constant.ConstantOnlineClass;
-import nz.co.enums.BizCodeEnum;
-import nz.co.enums.ProductTaskLockStateEnum;
+import nz.co.enums.*;
 import nz.co.exception.BizCodeException;
+import nz.co.feign.OrderFeignService;
 import nz.co.model.ProductDO;
 import nz.co.mapper.ProductMapper;
 import nz.co.model.ProductRecordMessage;
@@ -18,6 +18,7 @@ import nz.co.request.OrderItemRequest;
 import nz.co.service.ProductService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import nz.co.service.ProductTaskService;
+import nz.co.utils.JsonData;
 import nz.co.vo.ProductVO;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
@@ -52,24 +53,27 @@ public class ProductServiceImpl  implements ProductService {
     private RabbitMqConfig rabbitMqConfig;
     @Autowired
     private RabbitTemplate rabbitTemplate;
+    @Autowired
+    private OrderFeignService orderFeignService;
+
     @Override
     public Map<String, Object> listPageByPage(int page, int size) {
-        Page<ProductDO> pageInfo = new Page<ProductDO>(page,size);
-        IPage<ProductDO> ipage = productMapper.selectPage(pageInfo,new QueryWrapper<ProductDO>()
-                                    .orderByDesc("create_time"));
-        if(ipage == null)
+        Page<ProductDO> pageInfo = new Page<ProductDO>(page, size);
+        IPage<ProductDO> ipage = productMapper.selectPage(pageInfo, new QueryWrapper<ProductDO>()
+                .orderByDesc("create_time"));
+        if (ipage == null)
             return null;
         long total_records = ipage.getTotal();
         long total_pages = ipage.getPages();
 
-        List<ProductVO> current_page = ipage.getRecords().stream().map(obj->{
+        List<ProductVO> current_page = ipage.getRecords().stream().map(obj -> {
             ProductVO productVO = beanProcess(obj);
             return productVO;
         }).collect(Collectors.toList());
-        Map<String,Object> mapPage = new HashMap<>(3);
-        mapPage.put(ConstantOnlineClass.PAGINATION_TOTAL_RECORDS,total_records);
-        mapPage.put(ConstantOnlineClass.PAGINATION_TOTAL_PAGES,total_pages);
-        mapPage.put(ConstantOnlineClass.PAGINATION_CURRENT_DATA,current_page);
+        Map<String, Object> mapPage = new HashMap<>(3);
+        mapPage.put(ConstantOnlineClass.PAGINATION_TOTAL_RECORDS, total_records);
+        mapPage.put(ConstantOnlineClass.PAGINATION_TOTAL_PAGES, total_pages);
+        mapPage.put(ConstantOnlineClass.PAGINATION_CURRENT_DATA, current_page);
         return mapPage;
     }
 
@@ -79,33 +83,39 @@ public class ProductServiceImpl  implements ProductService {
         return beanProcess(productDO);
     }
 
+    public ProductVO listProductDetailBySerialNo(String serialNo) {
+        ProductDO productDO = productMapper.selectOne(new QueryWrapper<ProductDO>()
+                .eq("serial_no", serialNo));
+        return beanProcess(productDO);
+    }
+
     @Override
     public List<ProductVO> listProductsBatch(List<String> productIds) {
         QueryWrapper<ProductDO> queryWrapper = new QueryWrapper<ProductDO>()
-                .in("id",productIds);
+                .in("id", productIds);
         List<ProductDO> products = productMapper.selectList(queryWrapper);
-        List<ProductVO> productVOS = products.stream().map(obj->{
+        List<ProductVO> productVOS = products.stream().map(obj -> {
             return beanProcess(obj);
         }).collect(Collectors.toList());
         return productVOS;
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class,propagation = Propagation.REQUIRED)
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
     public int lockStock(LockProductsRequest lockProductsRequest) {
         String serialNo = lockProductsRequest.getSerialNo();
         List<OrderItemRequest> orderItems = lockProductsRequest.getOrderItems();
-        List<String> productIds = orderItems.stream().map(obj->{
+        List<String> productIds = orderItems.stream().map(obj -> {
             Long productId = obj.getProductId();
             return Long.toString(productId);
         }).collect(Collectors.toList());
         List<ProductVO> productVOS = this.listProductsBatch(productIds);
-        Map<Long,ProductVO> productVOMap = productVOS.stream().collect(Collectors.toMap(ProductVO::getId, Function.identity()));
-        for(OrderItemRequest orderItem:orderItems){
+        Map<Long, ProductVO> productVOMap = productVOS.stream().collect(Collectors.toMap(ProductVO::getId, Function.identity()));
+        for (OrderItemRequest orderItem : orderItems) {
             Long id = orderItem.getProductId();
             Integer buyNum = orderItem.getBuyNum();
-            int rows = productMapper.lockStock(id,buyNum);
-            if(rows != 1) throw new BizCodeException(BizCodeEnum.ORDER_LOCK_STOCK_FAILED);
+            int rows = productMapper.lockStock(id, buyNum);
+            if (rows != 1) throw new BizCodeException(BizCodeEnum.ORDER_LOCK_STOCK_FAILED);
             ProductTaskDO productTaskDO = new ProductTaskDO();
             productTaskDO.setBuyNum(buyNum);
             productTaskDO.setCreateTime(new Date());
@@ -117,10 +127,50 @@ public class ProductServiceImpl  implements ProductService {
             ProductRecordMessage productRecordMessage = new ProductRecordMessage();
             productRecordMessage.setProductTaskId(productTaskDO.getId());
             productRecordMessage.setSerialNo(serialNo);
-            rabbitTemplate.convertAndSend(rabbitMqConfig.getStockEventExchange(),rabbitMqConfig.getStockReleaseDelayRoutingKey(),productRecordMessage);
-            log.info("Send ProductRecordMessage to RabbitMq: "+productRecordMessage);
+            rabbitTemplate.convertAndSend(rabbitMqConfig.getStockEventExchange(), rabbitMqConfig.getStockReleaseDelayRoutingKey(), productRecordMessage);
+            log.info("Send ProductRecordMessage to RabbitMq: " + productRecordMessage);
         }
         return 0;
+    }
+
+    @Override
+    public boolean releaseStock(ProductRecordMessage recordMessage) {
+        Long taskId = recordMessage.getProductTaskId();
+        String serialNo = recordMessage.getSerialNo();
+        ProductTaskDO productTaskDO = productTaskService.queryTaskById(taskId);
+        if (productTaskDO == null) {
+            log.warn("Product task does not exist: " + recordMessage);
+            return true;
+        }
+        String state = productTaskDO.getLockState();
+        if (ProductTaskLockStateEnum.LOCKED.name().equalsIgnoreCase(state)) {
+            JsonData jsonData = orderFeignService.queryOrderStateBySerialNo(serialNo);
+            if (jsonData.getCode() == 0) {
+                String orderState = (String) jsonData.getData();
+                if (OrderStateEnum.PAY.name().equalsIgnoreCase(orderState)) {
+                    productTaskDO.setLockState(ProductTaskLockStateEnum.FINISHED.name());
+                    productTaskService.update(productTaskDO);
+                    log.info("The order has been paid,set product task state to FINISHED :" + recordMessage);
+                    return true;
+                } else if (OrderStateEnum.NEW.name().equalsIgnoreCase(orderState)) {
+                    log.info("The order has not been paid,return the message to queue :" + recordMessage);
+                    return false;
+                }
+            }
+
+
+        }
+        log.warn("The order does not exist or cancelled,update product task to CANCELLED and restore product stock: " + recordMessage);
+        productTaskDO.setLockState(ProductTaskLockStateEnum.CANCELLED.name());
+        productTaskService.update(productTaskDO);
+        updateStock(productTaskDO.getProductId(), productTaskDO.getBuyNum());
+        return false;
+    }
+
+
+    @Override
+    public int updateStock(Long productId,Integer buyNum){
+        return productMapper.updateStock(productId,buyNum);
     }
 
     private ProductVO beanProcess(ProductDO productDO){

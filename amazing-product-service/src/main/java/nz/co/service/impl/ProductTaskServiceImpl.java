@@ -23,4 +23,14 @@ public class ProductTaskServiceImpl implements ProductTaskService {
     public int insert(ProductTaskDO productTaskDO) {
         return productTaskMapper.insert(productTaskDO);
     }
+
+    @Override
+    public ProductTaskDO queryTaskById(Long taskId) {
+        return productTaskMapper.selectById(taskId);
+    }
+
+    @Override
+    public int update(ProductTaskDO productTaskDO) {
+        return productTaskMapper.updateById(productTaskDO);
+    }
 }

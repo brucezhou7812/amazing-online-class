@@ -15,4 +15,6 @@ import org.apache.ibatis.annotations.Param;
 public interface ProductMapper extends BaseMapper<ProductDO> {
 
     int lockStock(@Param("id")Long id, @Param("buyNum")Integer buyNum);
+
+    int updateStock(@Param("productId")Long productId, @Param("buyNum")Integer buyNum);
 }

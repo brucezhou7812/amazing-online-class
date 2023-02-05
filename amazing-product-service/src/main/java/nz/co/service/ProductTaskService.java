@@ -14,4 +14,8 @@ import com.baomidou.mybatisplus.extension.service.IService;
 public interface ProductTaskService{
 
     int insert(ProductTaskDO productTaskDO);
+
+    ProductTaskDO queryTaskById(Long taskId);
+
+    int update(ProductTaskDO productTaskDO);
 }

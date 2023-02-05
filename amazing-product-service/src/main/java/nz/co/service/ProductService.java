@@ -1,6 +1,7 @@
 package nz.co.service;
 
 
+import nz.co.model.ProductRecordMessage;
 import nz.co.request.LockProductsRequest;
 import nz.co.vo.ProductVO;
 
@@ -24,4 +25,8 @@ public interface ProductService {
     List<ProductVO> listProductsBatch(List<String> productIds);
 
     int lockStock(LockProductsRequest lockProductsRequest);
+
+    boolean releaseStock(ProductRecordMessage recordMessage);
+
+    int updateStock(Long productId,Integer buyNum);
 }
