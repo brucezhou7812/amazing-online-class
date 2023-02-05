@@ -3,12 +3,15 @@ package nz.co.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import lombok.extern.slf4j.Slf4j;
+import nz.co.config.RabbitMqConfig;
 import nz.co.constant.ConstantOnlineClass;
 import nz.co.enums.BizCodeEnum;
 import nz.co.enums.ProductTaskLockStateEnum;
 import nz.co.exception.BizCodeException;
 import nz.co.model.ProductDO;
 import nz.co.mapper.ProductMapper;
+import nz.co.model.ProductRecordMessage;
 import nz.co.model.ProductTaskDO;
 import nz.co.request.LockProductsRequest;
 import nz.co.request.OrderItemRequest;
@@ -16,9 +19,12 @@ import nz.co.service.ProductService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import nz.co.service.ProductTaskService;
 import nz.co.vo.ProductVO;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -36,11 +42,16 @@ import java.util.stream.Collectors;
  * @since 2023-01-20
  */
 @Service
+@Slf4j
 public class ProductServiceImpl  implements ProductService {
     @Autowired
     private ProductMapper productMapper;
     @Autowired
     private ProductTaskService productTaskService;
+    @Autowired
+    private RabbitMqConfig rabbitMqConfig;
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
     @Override
     public Map<String, Object> listPageByPage(int page, int size) {
         Page<ProductDO> pageInfo = new Page<ProductDO>(page,size);
@@ -80,6 +91,7 @@ public class ProductServiceImpl  implements ProductService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class,propagation = Propagation.REQUIRED)
     public int lockStock(LockProductsRequest lockProductsRequest) {
         String serialNo = lockProductsRequest.getSerialNo();
         List<OrderItemRequest> orderItems = lockProductsRequest.getOrderItems();
@@ -102,10 +114,12 @@ public class ProductServiceImpl  implements ProductService {
             productTaskDO.setProductName(productVOMap.get(id).getDetail());
             productTaskDO.setLockState(ProductTaskLockStateEnum.LOCKED.name());
             productTaskService.insert(productTaskDO);
-
+            ProductRecordMessage productRecordMessage = new ProductRecordMessage();
+            productRecordMessage.setProductTaskId(productTaskDO.getId());
+            productRecordMessage.setSerialNo(serialNo);
+            rabbitTemplate.convertAndSend(rabbitMqConfig.getStockEventExchange(),rabbitMqConfig.getStockReleaseDelayRoutingKey(),productRecordMessage);
+            log.info("Send ProductRecordMessage to RabbitMq: "+productRecordMessage);
         }
-
-
         return 0;
     }
 
