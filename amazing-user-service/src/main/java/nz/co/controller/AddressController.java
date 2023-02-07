@@ -5,12 +5,11 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import nz.co.enums.BizCodeEnum;
-import nz.co.exception.BizCodeException;
 import nz.co.model.AddressDO;
 import nz.co.request.AddressAddRequest;
 import nz.co.service.AddressService;
 import nz.co.utils.JsonData;
-import nz.co.vo.AddressVO;
+import nz.co.model.AddressVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,7 +31,7 @@ public class AddressController {
     private AddressService addressService;
     @ApiOperation("Query customer address according to address id")
     @GetMapping("find/{address_id}")
-    public JsonData detail(@ApiParam(value="Address id",required = true)
+    public JsonData<AddressVO> detail(@ApiParam(value="Address id",required = true)
                                 @PathVariable("address_id")Long id) {
         AddressVO addressvO = addressService.detail(id);
 

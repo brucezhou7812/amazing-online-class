@@ -2,7 +2,7 @@ package nz.co.service;
 
 import nz.co.model.AddressDO;
 import nz.co.request.AddressAddRequest;
-import nz.co.vo.AddressVO;
+import nz.co.model.AddressVO;
 
 import java.util.List;
 

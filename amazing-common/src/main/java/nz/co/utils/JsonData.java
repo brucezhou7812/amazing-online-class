@@ -6,10 +6,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import nz.co.enums.BizCodeEnum;
 
+import java.lang.ref.Reference;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class JsonData {
+public class JsonData<T> {
 
     /**
      * 状态码 0 表示成功
@@ -19,11 +21,12 @@ public class JsonData {
     /**
      * 数据
      */
-    private Object data;
+    private T data;
     /**
      * 描述
      */
     private String msg;
+
 
 
     /**
@@ -39,7 +42,7 @@ public class JsonData {
      * @param data
      * @return
      */
-    public static JsonData buildSuccess(Object data) {
+    public static <T> JsonData buildSuccess(T data) {
         return new JsonData(0, data, null);
     }
 

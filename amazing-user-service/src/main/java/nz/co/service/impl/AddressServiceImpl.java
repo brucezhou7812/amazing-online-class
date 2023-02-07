@@ -9,11 +9,10 @@ import nz.co.model.AddressDO;
 import nz.co.model.UserLoginModel;
 import nz.co.request.AddressAddRequest;
 import nz.co.service.AddressService;
-import nz.co.vo.AddressVO;
+import nz.co.model.AddressVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import sun.rmi.runtime.Log;
 
 import java.util.Date;
 import java.util.List;

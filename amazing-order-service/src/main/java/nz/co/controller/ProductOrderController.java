@@ -76,7 +76,7 @@ public class ProductOrderController {
     }
     @GetMapping("list")
     @ApiOperation("Query the state of the order")
-    public JsonData queryOrderStateBySerialNo(@ApiParam("the serial number of the order")@RequestParam("serial_no")String serialNo){
+    public JsonData<String> queryOrderStateBySerialNo(@ApiParam("the serial number of the order")@RequestParam("serial_no")String serialNo){
         String state = productOrderService.queryOrderState(serialNo);
         return StringUtils.isBlank(state) ? JsonData.buildResult(BizCodeEnum.ORDER_NOT_EXIST):JsonData.buildSuccess(state);
     }

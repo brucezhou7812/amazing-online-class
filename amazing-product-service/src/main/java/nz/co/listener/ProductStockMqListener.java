@@ -8,10 +8,12 @@ import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
 @Slf4j
+@Component
 @RabbitListener(queues = "${mqconfig.stock_release_queue}")
 public class ProductStockMqListener {
     @Autowired
@@ -26,7 +28,7 @@ public class ProductStockMqListener {
                 channel.basicAck(messageTag, false);
             } else {
                 log.error("release stock failed:" + recordMessage);
-                channel.basicReject(messageTag, true);
+                channel.basicReject(messageTag, false);
             }
         }catch (IOException e){
             log.error("Exception is thrown when releasing stock:" + recordMessage);

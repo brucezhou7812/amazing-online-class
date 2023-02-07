@@ -10,9 +10,9 @@ import java.math.BigDecimal;
 @ApiModel("The request for generating order")
 @Data
 public class GenerateOrderRequest {
-    @JsonProperty(value="coupon_id")
-    @ApiModelProperty(value="coupon id",example = "1")
-    private Long couponId;
+    @JsonProperty(value="coupon_record_id")
+    @ApiModelProperty(value="coupon record id",example = "1")
+    private Long couponRecordId;
     @JsonProperty(value="product_ids")
     @ApiModelProperty(value="the list of product id",example = "[1,2,3]")
     private Long productIds;
@@ -24,7 +24,7 @@ public class GenerateOrderRequest {
     private String clientType;
     @JsonProperty(value="address_id")
     @ApiModelProperty(value="address id",example = "1")
-    private String addressId;
+    private Long addressId;
     @JsonProperty(value="total_fee")
     @ApiModelProperty(value="total fee",example = "1000")
     private BigDecimal totalFee;

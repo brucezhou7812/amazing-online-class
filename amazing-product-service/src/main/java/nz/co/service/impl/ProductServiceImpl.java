@@ -144,9 +144,9 @@ public class ProductServiceImpl  implements ProductService {
         }
         String state = productTaskDO.getLockState();
         if (ProductTaskLockStateEnum.LOCKED.name().equalsIgnoreCase(state)) {
-            JsonData jsonData = orderFeignService.queryOrderStateBySerialNo(serialNo);
+            JsonData<String> jsonData = orderFeignService.queryOrderStateBySerialNo(serialNo);
             if (jsonData.getCode() == 0) {
-                String orderState = (String) jsonData.getData();
+                String orderState = jsonData.getData();
                 if (OrderStateEnum.PAY.name().equalsIgnoreCase(orderState)) {
                     productTaskDO.setLockState(ProductTaskLockStateEnum.FINISHED.name());
                     productTaskService.update(productTaskDO);

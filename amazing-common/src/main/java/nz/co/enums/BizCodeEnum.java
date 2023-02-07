@@ -25,6 +25,7 @@ public enum BizCodeEnum {
     ACCOUNT_REPEAT(250001,"Repetitive Account"),
     ACCOUNT_UNREGISTER(250002,"Account Unregister"),
     ACCOUNT_PWD_ERROR(250003,"Error Password"),
+    ACCOUNT_NOT_LOGIN(250004,"Please Login"),
 
     /**
      * address error
