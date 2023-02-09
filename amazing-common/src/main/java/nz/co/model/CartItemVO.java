@@ -1,4 +1,4 @@
-package nz.co.vo;
+package nz.co.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;

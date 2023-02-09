@@ -10,7 +10,8 @@ import nz.co.request.UpdateCartRequest;
 import nz.co.service.CartService;
 import nz.co.request.AddCartRequest;
 import nz.co.service.ProductService;
-import nz.co.vo.CartItemVO;
+import nz.co.utils.JsonData;
+import nz.co.model.CartItemVO;
 import nz.co.vo.CartVO;
 import nz.co.vo.ProductVO;
 import org.apache.commons.lang3.StringUtils;
@@ -104,11 +105,24 @@ public class CartServiceImpl implements CartService {
         return cartVO;
     }
 
+    private List<CartItemVO> getCartItems(){
+        BoundHashOperations<String,Object,Object> cart = this.getCart();
+        List<Object> stringCartItems = cart.values();
+        if(cart.size() == 0) return null;
+        List<CartItemVO> cartItems = stringCartItems.stream().map(obj->{
+            String strCarItems = (String)obj;
+            CartItemVO cartItemVO = JSON.parseObject(strCarItems,CartItemVO.class);
+            return cartItemVO;
+        }).collect(Collectors.toList());
+        return cartItems;
+    }
+
     private void checkAndUpdatePrice(List<CartItemVO> sources,List<String>productIds){
         List<ProductVO> products = productService.listProductsBatch(productIds);
         Map<Long,ProductVO> productMap = products.stream().collect(Collectors.toMap(ProductVO::getId, Function.identity()));
         sources.stream().map(obj->{
             ProductVO productVO = productMap.get(obj.getProductId());
+            if(productVO == null) return obj;
             obj.setPrice(productVO.getPrice());
             obj.setProductTitle(productVO.getTitle());
             obj.setProductImg(productVO.getCoverImg());
@@ -132,6 +146,29 @@ public class CartServiceImpl implements CartService {
         strCartItem = JSON.toJSONString(cartItem);
         myCart.put(strProductId,strCartItem);
         return cartItem;
+    }
+
+    @Override
+    public JsonData<List<CartItemVO>> confirmCartItems(List<Long> productIds) {
+        List<CartItemVO> cartItems = getCartItems();
+        if(cartItems == null || cartItems.size()==0)
+            return JsonData.buildResult(BizCodeEnum.CART_IS_EMPTY);
+        List<String> strProductIds = productIds.stream().map(obj->{
+            String strId = Long.toString(obj);
+            return strId;
+        }).collect(Collectors.toList());
+        checkAndUpdatePrice(cartItems,strProductIds);
+        List<CartItemVO> confirmItems = cartItems.stream().filter(obj->{
+            Long productId = obj.getProductId();
+            boolean exist = productIds.contains(productId);
+            if(exist){
+                this.deleteItem(productId);
+                return true;
+            }else{
+                return false;
+            }
+        }).collect(Collectors.toList());
+        return JsonData.buildSuccess(confirmItems);
     }
 
     private String getCartKey() {

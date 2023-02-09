@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @ApiModel("The request for generating order")
 @Data
@@ -15,7 +16,7 @@ public class GenerateOrderRequest {
     private Long couponRecordId;
     @JsonProperty(value="product_ids")
     @ApiModelProperty(value="the list of product id",example = "[1,2,3]")
-    private Long productIds;
+    private List<Long> productIds;
     @JsonProperty(value="pay_type")
     @ApiModelProperty(value="pay type",example = "ALIPAY")
     private String payType;

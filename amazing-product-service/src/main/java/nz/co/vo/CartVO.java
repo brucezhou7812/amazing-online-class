@@ -1,6 +1,7 @@
 package nz.co.vo;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import nz.co.model.CartItemVO;
 
 import java.math.BigDecimal;
 import java.util.List;

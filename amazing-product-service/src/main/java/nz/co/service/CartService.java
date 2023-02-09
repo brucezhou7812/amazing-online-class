@@ -2,7 +2,8 @@ package nz.co.service;
 
 import nz.co.request.AddCartRequest;
 import nz.co.request.UpdateCartRequest;
-import nz.co.vo.CartItemVO;
+import nz.co.utils.JsonData;
+import nz.co.model.CartItemVO;
 import nz.co.vo.CartVO;
 
 import java.util.List;
@@ -17,4 +18,6 @@ public interface CartService {
     CartItemVO deleteItem(Long productID);
 
     CartItemVO updateCart(UpdateCartRequest request);
+
+    JsonData<List<CartItemVO>> confirmCartItems(List<Long> productIds);
 }

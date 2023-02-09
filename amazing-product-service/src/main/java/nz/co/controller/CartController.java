@@ -8,7 +8,7 @@ import nz.co.request.UpdateCartRequest;
 import nz.co.service.CartService;
 import nz.co.utils.JsonData;
 import nz.co.request.AddCartRequest;
-import nz.co.vo.CartItemVO;
+import nz.co.model.CartItemVO;
 import nz.co.vo.CartVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -54,6 +54,12 @@ public class CartController {
     public JsonData updateItem(@ApiParam(value="update the number of cart item")@RequestBody UpdateCartRequest request){
         CartItemVO cartItemVO = cartService.updateCart(request);
         return cartItemVO == null ?JsonData.buildResult(BizCodeEnum.PRODUCT_NOT_EXIST):JsonData.buildSuccess(cartItemVO);
+    }
+
+    @PostMapping(value="confirm_items_in_cart")
+    @ApiOperation(value="confirm items in cart")
+    public JsonData<List<CartItemVO>> confirmCartItems(@ApiParam("The ids of the products to buy")@RequestBody List<Long> productIds){
+        return cartService.confirmCartItems(productIds);
     }
 
 }
