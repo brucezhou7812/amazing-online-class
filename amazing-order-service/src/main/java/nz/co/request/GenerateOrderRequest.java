@@ -11,6 +11,9 @@ import java.util.List;
 @ApiModel("The request for generating order")
 @Data
 public class GenerateOrderRequest {
+    @JsonProperty(value="serial_no")
+    @ApiModelProperty(value="serial no",example = "123456abc")
+    private String serialNo;
     @JsonProperty(value="coupon_record_id")
     @ApiModelProperty(value="coupon record id",example = "1")
     private Long couponRecordId;

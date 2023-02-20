@@ -5,11 +5,11 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import nz.co.enums.BizCodeEnum;
-import nz.co.request.LockCouponRecordRequest;
+import nz.co.model.CouponTaskDO;
+import nz.co.model.LockCouponRecordRequest;
 import nz.co.service.CouponRecordService;
-import nz.co.service.CouponService;
 import nz.co.utils.JsonData;
-import nz.co.vo.CouponRecordVO;
+import nz.co.model.CouponRecordVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -42,13 +42,13 @@ public class CouponRecordController {
 
     @GetMapping("detail/{record_id}")
     @ApiOperation("Query coupon record detail information")
-    public JsonData detail(@ApiParam("Coupon record id")@PathVariable("record_id") int record_id){
+    public JsonData<CouponRecordVO> detail(@ApiParam("Coupon record id")@PathVariable("record_id") Long record_id){
         CouponRecordVO couponRecordVO = couponRecordService.findRecordById(record_id);
         return couponRecordVO != null ? JsonData.buildSuccess(couponRecordVO):JsonData.buildResult(BizCodeEnum.COUPON_NOT_EXIST);
     }
     @PostMapping("lock_coupon_record_batch")
     @ApiOperation("RPC:lock coupon record batch")
-    public JsonData lockCouponRecordBatch(@ApiParam("coupon record ids")@RequestBody LockCouponRecordRequest lockCouponRecordRequest){
+    public JsonData<CouponTaskDO> lockCouponRecordBatch(@ApiParam("coupon record ids")@RequestBody LockCouponRecordRequest lockCouponRecordRequest){
         JsonData jsonData = couponRecordService.lockCouponRecordBatch(lockCouponRecordRequest);
         return jsonData;
     }

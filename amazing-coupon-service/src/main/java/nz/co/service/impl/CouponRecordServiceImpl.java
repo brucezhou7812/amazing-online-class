@@ -15,20 +15,17 @@ import nz.co.interceptor.LoginInterceptor;
 import nz.co.mapper.CouponTaskMapper;
 import nz.co.model.*;
 import nz.co.mapper.CouponRecordMapper;
-import nz.co.request.LockCouponRecordRequest;
+import nz.co.model.LockCouponRecordRequest;
 import nz.co.service.CouponRecordService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import nz.co.service.CouponTaskService;
 import nz.co.utils.JsonData;
-import nz.co.vo.CouponRecordVO;
-import nz.co.vo.CouponTaskVO;
+import nz.co.model.CouponRecordVO;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import springfox.documentation.spring.web.json.Json;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -75,7 +72,7 @@ public class CouponRecordServiceImpl implements CouponRecordService {
     }
 
     @Override
-    public CouponRecordVO findRecordById(int record_id) {
+    public CouponRecordVO findRecordById(Long record_id) {
         UserLoginModel userLoginModel = LoginInterceptor.threadLocalUserLoginModel.get();
         QueryWrapper<CouponRecordDO> queryWrapper = new QueryWrapper<CouponRecordDO>()
                 .eq("user_id",userLoginModel.getId())
@@ -86,7 +83,7 @@ public class CouponRecordServiceImpl implements CouponRecordService {
     }
 
     @Override
-    public JsonData lockCouponRecordBatch(LockCouponRecordRequest lockCouponRecordRequest) {
+    public JsonData<CouponTaskDO> lockCouponRecordBatch(LockCouponRecordRequest lockCouponRecordRequest) {
         String serialNum = lockCouponRecordRequest.getSerialNum();
         List<Long> couponRecordIds = lockCouponRecordRequest.getCouponRecordIds();
         UserLoginModel userLoginModel = LoginInterceptor.threadLocalUserLoginModel.get();
@@ -149,7 +146,7 @@ public class CouponRecordServiceImpl implements CouponRecordService {
                 }
             }
 
-            log.warn("The order does not exist or cancelled,update coupon task to CANCELLED and restore coupon state to NEW:"+recordMessage);
+            log.warn("The order does not exist or is cancelled,update coupon task to CANCELLED and restore coupon state to NEW:"+recordMessage);
             couponTaskDO.setLockState(CouponTaskLockStateEnum.CANCELLED.name());
             couponTaskService.updateLockState(couponTaskDO);
             updateUseState(couponTaskDO.getCouponRecordId(),CouponUseStateEnum.COUPON_NEW.getDesc());

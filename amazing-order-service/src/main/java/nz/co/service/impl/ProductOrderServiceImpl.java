@@ -3,18 +3,25 @@ package nz.co.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import nz.co.enums.BizCodeEnum;
+import nz.co.enums.CouponUseStateEnum;
+import nz.co.exception.BizCodeException;
 import nz.co.feign.AddressFeignService;
 import nz.co.feign.CartFeignService;
+import nz.co.feign.CouponFeignService;
+import nz.co.feign.ProductFeignService;
 import nz.co.interceptor.LoginInterceptor;
 import nz.co.model.*;
 import nz.co.mapper.ProductOrderMapper;
 import nz.co.request.GenerateOrderRequest;
 import nz.co.service.ProductOrderService;
+import nz.co.utils.CommonUtils;
 import nz.co.utils.JsonData;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -34,6 +41,10 @@ public class ProductOrderServiceImpl implements ProductOrderService {
     private AddressFeignService addressFeignService;
     @Autowired
     private CartFeignService cartFeignService;
+    @Autowired
+    private CouponFeignService couponFeignService;
+    @Autowired
+    private ProductFeignService productFeignService;
     @Override
     public JsonData generateOrder(GenerateOrderRequest generateOrderRequest) {
         UserLoginModel userLoginModel = LoginInterceptor.threadLocalUserLoginModel.get();
@@ -47,15 +58,106 @@ public class ProductOrderServiceImpl implements ProductOrderService {
             return JsonData.buildResult(BizCodeEnum.ADDRESS_NOT_EXIST);
         }
         List<Long> productIds = generateOrderRequest.getProductIds();
-        JsonData<List<CartItemVO>> jsonData = cartFeignService.confirmCartItems(productIds);
+        String serialNo = generateOrderRequest.getSerialNo();//CommonUtils.getRandomCode(32);
+        JsonData<List<CartItemVO>> jsonData = cartFeignService.confirmCartItems(productIds,serialNo);
         if(jsonData.getCode() == 0){
-           List<CartItemVO> orderItems = jsonData.getData();
+            List<CartItemVO> orderItems = jsonData.getData();
+            this.checkPrice(orderItems,generateOrderRequest);
+            this.lockCouponRecord(generateOrderRequest);
+            this.lockProductStock(generateOrderRequest,orderItems,userLoginModel.getId());
             return JsonData.buildSuccess(orderItems);
         }else{
             log.error("Confirm Cart items failed:"+generateOrderRequest);
             return JsonData.buildResult(BizCodeEnum.ORDER_CONFIRM_FAILED);
         }
 
+
+    }
+
+    private void lockProductStock(GenerateOrderRequest orderRequest,List<CartItemVO> cartItemVOs,Long userId){
+        LockProductsRequest lockProductsRequest = new LockProductsRequest();
+        lockProductsRequest.setSerialNo(orderRequest.getSerialNo());
+        List<OrderItemRequest> orderItemRequests = new ArrayList<>();
+        for(CartItemVO cartItemVO:cartItemVOs){
+            OrderItemRequest orderItemRequest = new OrderItemRequest();
+            orderItemRequest.setProductTitle(cartItemVO.getProductTitle());
+            orderItemRequest.setBuyNum(cartItemVO.getBuyNum());
+            orderItemRequest.setProductId(cartItemVO.getProductId());
+            orderItemRequest.setSerailNo(orderRequest.getSerialNo());
+            orderItemRequest.setUserId(userId);
+            orderItemRequests.add(orderItemRequest);
+        }
+        lockProductsRequest.setOrderItems(orderItemRequests);
+        JsonData jsonData = productFeignService.lockProductStock(lockProductsRequest);
+        if(jsonData.getCode()!=0){
+            throw new BizCodeException(BizCodeEnum.ORDER_LOCK_STOCK_FAILED);
+        }
+    }
+
+    private void lockCouponRecord(GenerateOrderRequest orderRequest){
+        Long couponRecordId = orderRequest.getCouponRecordId();
+        if(couponRecordId > 0) {
+            LockCouponRecordRequest lockCouponRecordRequest = new LockCouponRecordRequest();
+            lockCouponRecordRequest.setSerialNum(orderRequest.getSerialNo());
+            List<Long> couponRecordIds = new ArrayList<>();
+            couponRecordIds.add(couponRecordId);
+            JsonData<CouponTaskDO> jsonData = couponFeignService.lockCouponRecordBatch(lockCouponRecordRequest);
+            if(jsonData.getCode()!=0){
+                throw new BizCodeException(BizCodeEnum.COUPON_LOCK_FAIL);
+            }
+        }
+    }
+
+    private void checkPrice(List<CartItemVO> orderItems,GenerateOrderRequest generateOrderRequest){
+        BigDecimal totalAmount = new BigDecimal(0);
+        for(CartItemVO cartItemVO:orderItems){
+            totalAmount = totalAmount.add(cartItemVO.getTotalFee());
+        }
+        CouponRecordVO couponRecordVO = getCartCouponRecord(generateOrderRequest.getCouponRecordId());
+        if(couponRecordVO != null) {
+
+                if (totalAmount.compareTo(couponRecordVO.getConditionPrice()) < 0) {
+                    throw new BizCodeException(BizCodeEnum.COUPON_RECORD_DO_NOT_MEET_PRICE_CONDITION);
+                }else if(couponRecordVO.getPrice().compareTo(totalAmount)  >0){
+                    totalAmount = BigDecimal.ZERO;
+                }else{
+                    totalAmount = totalAmount.subtract(couponRecordVO.getPrice());
+                }
+
+        }
+        if(totalAmount.compareTo(generateOrderRequest.getFeeToPay())!=0){
+            log.error("check price failed.");
+            throw new BizCodeException(BizCodeEnum.COUPON_RECORD_CONFIRM_FAILED);
+        }
+
+
+    }
+    private CouponRecordVO getCartCouponRecord(Long couponRecordId){
+        if((couponRecordId == null)||(couponRecordId < 0)){
+            return null;
+        }
+        JsonData<CouponRecordVO> jsonData = couponFeignService.detail(couponRecordId);
+        if(jsonData.getCode() != 0)
+            throw new BizCodeException(BizCodeEnum.COUPON_RECORD_CONFIRM_FAILED);
+        CouponRecordVO couponRecordVO = jsonData.getData();
+        if(validateCoupon(couponRecordVO)) {
+            return couponRecordVO;
+        }else{
+            throw new BizCodeException(BizCodeEnum.COUPON_RECORD_INVALIDE);
+        }
+    }
+    private boolean validateCoupon(CouponRecordVO couponRecordVO){
+        if(couponRecordVO == null)
+            return false;
+        if(couponRecordVO.getUseState().equalsIgnoreCase(CouponUseStateEnum.COUPON_NEW.name())){
+            long current = CommonUtils.getTimestamp();
+            long start = couponRecordVO.getStartTime().getTime();
+            long end = couponRecordVO.getEndTime().getTime();
+            if(current >= start && current <= end){
+                return true;
+            }
+        }
+        return false;
     }
 
     private AddressVO getUserAddress(Long addressId){

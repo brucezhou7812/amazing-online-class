@@ -9,7 +9,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import javax.servlet.http.HttpServletRequest;
 @Configuration
 public class RequestInterceptorConfig {
-    @Bean
+   @Bean
     public RequestInterceptor requestInterceptor(){
         return template -> {
             ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();

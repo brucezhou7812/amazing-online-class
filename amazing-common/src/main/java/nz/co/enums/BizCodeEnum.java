@@ -36,6 +36,10 @@ public enum BizCodeEnum {
     COUPON_EXCEED_USER_LIMIT(270002,"Coupon exceeds user limit"),
     COUPON_LOCK_FAIL(270003,"Coupon locking failed"),
     COUPON_TASK_NOT_EXIST(280001,"Coupon Task Record not exist"),
+    COUPON_RECORD_NOT_EXIST(290001,"Coupon Record Not Exist"),
+    COUPON_RECORD_CONFIRM_FAILED(2990002,"Coupon Record confirm failed"),
+    COUPON_RECORD_INVALIDE(290003,"Coupon Record Invalid"),
+    COUPON_RECORD_DO_NOT_MEET_PRICE_CONDITION(290004,"Coupon does not meet price condition"),
     /**
      * File error
      */
@@ -49,6 +53,7 @@ public enum BizCodeEnum {
      * product error
      */
     PRODUCT_NOT_EXIST(810001,"Product not exist"),
+
     /**
      * cart error
      */

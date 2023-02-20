@@ -1,13 +1,10 @@
 package nz.co.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import nz.co.enums.BizCodeEnum;
 import nz.co.model.CouponTaskDO;
 import nz.co.mapper.CouponTaskMapper;
 import nz.co.service.CouponTaskService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import nz.co.utils.JsonData;
-import nz.co.vo.CouponTaskVO;
+import nz.co.model.CouponTaskVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

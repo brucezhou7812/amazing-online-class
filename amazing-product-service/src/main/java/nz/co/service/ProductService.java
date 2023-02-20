@@ -2,8 +2,8 @@ package nz.co.service;
 
 
 import nz.co.model.ProductRecordMessage;
-import nz.co.request.LockProductsRequest;
-import nz.co.vo.ProductVO;
+import nz.co.model.LockProductsRequest;
+import nz.co.model.ProductVO;
 
 import java.util.List;
 import java.util.Map;

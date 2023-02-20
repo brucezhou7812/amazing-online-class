@@ -58,8 +58,9 @@ public class CartController {
 
     @PostMapping(value="confirm_items_in_cart")
     @ApiOperation(value="confirm items in cart")
-    public JsonData<List<CartItemVO>> confirmCartItems(@ApiParam("The ids of the products to buy")@RequestBody List<Long> productIds){
-        return cartService.confirmCartItems(productIds);
+    public JsonData<List<CartItemVO>> confirmCartItems(@ApiParam("The ids of the products to buy")@RequestBody List<Long> productIds,
+                                                       @ApiParam("The serial no of the order")@RequestParam("serial_no") String serialNo){
+        return cartService.confirmCartItems(productIds,serialNo);
     }
 
 }

@@ -5,7 +5,7 @@ spring:
     name: amazing-produce-service
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/amazing_product?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=UTC
+    url: jdbc:mysql://localhost:3306/amazing_product?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
     username: root
     password: 12345678
   redis:
@@ -50,8 +50,14 @@ logging:
 
 mqconfig:
   stock_release_delay_queue: stock.release.delay_queue
+  cart_release_delay_queue: cart.release.delay_queue
   stock_release_queue: stock.release.queue
+  cart_release_queue: cart.release.queue
   stock_event_exchange: stock.event.exchange
+  cart_event_exchange: cart.event.exchange
   stock_release_delay_routing_key: stock.release.delay.routing.key
+  cart_release_delay_routing_key: cart.release.delay.routing.key
   stock_release_routing_key: stock.release.routing.key
-  ttl: 15000
+  cart_release_routing_key: cart.release.routing.key
+  stock_ttl: 15000
+  cart_ttl: 15000

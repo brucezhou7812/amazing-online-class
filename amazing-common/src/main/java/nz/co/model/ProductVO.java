@@ -1,4 +1,4 @@
-package nz.co.vo;
+package nz.co.model;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;

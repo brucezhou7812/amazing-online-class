@@ -1,4 +1,4 @@
-package nz.co.request;
+package nz.co.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;

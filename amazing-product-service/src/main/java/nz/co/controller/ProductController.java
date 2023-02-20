@@ -5,10 +5,10 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import nz.co.enums.BizCodeEnum;
-import nz.co.request.LockProductsRequest;
+import nz.co.model.LockProductsRequest;
 import nz.co.service.ProductService;
 import nz.co.utils.JsonData;
-import nz.co.vo.ProductVO;
+import nz.co.model.ProductVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,7 +38,7 @@ public class ProductController {
 
     @GetMapping("product_detail/{product_id}")
     @ApiOperation("list product detail")
-    public JsonData productDetail(@ApiParam("product id")@PathVariable Long product_id){
+    public JsonData<ProductVO> productDetail(@ApiParam("product id")@PathVariable(value="product_id") Long product_id){
         ProductVO productVO = productService.listProductDetailById(product_id);
         return productVO == null?JsonData.buildResult(BizCodeEnum.PRODUCT_NOT_EXIST):JsonData.buildSuccess(productVO);
     }

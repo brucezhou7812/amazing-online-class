@@ -20,6 +20,7 @@ import springfox.documentation.spring.web.plugins.Docket;
 public class UserApplication {
 
     public static void main(String[] args) {
+
         SpringApplication.run(UserApplication.class, args);
     }
 }

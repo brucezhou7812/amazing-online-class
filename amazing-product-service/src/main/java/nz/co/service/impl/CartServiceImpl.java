@@ -1,38 +1,56 @@
 package nz.co.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import lombok.extern.slf4j.Slf4j;
+import nz.co.config.RabbitMqConfig;
 import nz.co.constant.ConstantOnlineClass;
 import nz.co.enums.BizCodeEnum;
+import nz.co.enums.CartTaskLockStateEnum;
+import nz.co.enums.OrderStateEnum;
 import nz.co.exception.BizCodeException;
+import nz.co.feign.OrderFeignService;
 import nz.co.interceptor.LoginInterceptor;
+import nz.co.model.CartTaskDO;
+import nz.co.model.OrderItemRequest;
 import nz.co.model.UserLoginModel;
 import nz.co.request.UpdateCartRequest;
 import nz.co.service.CartService;
 import nz.co.request.AddCartRequest;
+import nz.co.service.CartTaskService;
 import nz.co.service.ProductService;
 import nz.co.utils.JsonData;
 import nz.co.model.CartItemVO;
 import nz.co.vo.CartVO;
-import nz.co.vo.ProductVO;
+import nz.co.model.ProductVO;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class CartServiceImpl implements CartService {
     @Autowired
     private StringRedisTemplate redisTemplate;
     @Autowired
     private ProductService productService;
-
+    @Autowired
+    private RabbitMqConfig rabbitMqConfig;
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+    @Autowired
+    private CartTaskService cartTaskService;
+    @Autowired
+    private OrderFeignService orderFeignService;
     @Override
     public void addToCart(AddCartRequest addCartRequest) {
         Long productIdNum = addCartRequest.getProductId();
@@ -149,7 +167,7 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public JsonData<List<CartItemVO>> confirmCartItems(List<Long> productIds) {
+    public JsonData<List<CartItemVO>> confirmCartItems(List<Long> productIds,String serialNo) {
         List<CartItemVO> cartItems = getCartItems();
         if(cartItems == null || cartItems.size()==0)
             return JsonData.buildResult(BizCodeEnum.CART_IS_EMPTY);
@@ -158,17 +176,88 @@ public class CartServiceImpl implements CartService {
             return strId;
         }).collect(Collectors.toList());
         checkAndUpdatePrice(cartItems,strProductIds);
+
         List<CartItemVO> confirmItems = cartItems.stream().filter(obj->{
             Long productId = obj.getProductId();
             boolean exist = productIds.contains(productId);
             if(exist){
+                OrderItemRequest orderItemRequest = new OrderItemRequest();
+                Long userId = LoginInterceptor.threadLocalUserLoginModel.get().getId();
+                orderItemRequest.setUserId(userId);
+                orderItemRequest.setSerailNo(serialNo);
+                orderItemRequest.setProductId(productId);
+                orderItemRequest.setBuyNum(obj.getBuyNum());
+                orderItemRequest.setProductTitle(obj.getProductTitle());
+                rabbitTemplate.convertAndSend(rabbitMqConfig.getCartEventExchange(),rabbitMqConfig.getCartReleaseDelayRoutingKey(),orderItemRequest);
+                this.insertCartTask(obj,serialNo);
                 this.deleteItem(productId);
                 return true;
             }else{
                 return false;
             }
         }).collect(Collectors.toList());
+
         return JsonData.buildSuccess(confirmItems);
+    }
+
+    @Override
+    public boolean restoreCartItem(OrderItemRequest orderItemRequest) {
+        String serialNo = orderItemRequest.getSerailNo();
+        Long productId = orderItemRequest.getProductId();
+        Long userId = orderItemRequest.getUserId();
+        if(orderItemRequest == null){
+            log.error("OrderItemRequest is null");
+            return true;
+        }
+        CartTaskDO cartTaskDO = cartTaskService.listCartTask(serialNo,productId,userId);
+        if(cartTaskDO == null){
+            log.error("Cart Task does not exist: "+orderItemRequest);
+            return true;
+        }
+        String state = cartTaskDO.getLockState();
+        if(CartTaskLockStateEnum.LOCKED.name().equalsIgnoreCase(state)) {
+            JsonData<String> jsonData = orderFeignService.queryOrderStateBySerialNo(serialNo);
+            if(jsonData.getCode() == 0) {
+                String orderState = jsonData.getData();
+                if(OrderStateEnum.PAY.name().equalsIgnoreCase(orderState)){
+                    cartTaskDO.setLockState(CartTaskLockStateEnum.FINISHED.name());
+                    cartTaskService.updateLockState(cartTaskDO);
+                    log.info("update cart task state to FINISHED: " + cartTaskDO);
+                    return true;
+                }else if(OrderStateEnum.NEW.name().equalsIgnoreCase(orderState)){
+
+                    log.info("The order has not been paid: " + cartTaskDO);
+                    return false;
+                }
+            }
+            log.info("The order does not exist or has been cancelled." +cartTaskDO);
+            AddCartRequest addCartRequest = new AddCartRequest();
+            addCartRequest.setProductId(productId);
+            addCartRequest.setBuyNum(orderItemRequest.getBuyNum());
+            addToCart(addCartRequest);
+            log.info("restore cart item: " + addCartRequest);
+            cartTaskDO.setLockState(CartTaskLockStateEnum.CANCELLED.name());
+            cartTaskService.updateLockState(cartTaskDO);
+            log.info("update cart task state to CANCELLED: " + cartTaskDO);
+            return true;
+
+        }else{
+            log.error("The Cart Task state is not locked :"+state);
+            return true;
+        }
+    }
+
+    private int insertCartTask(CartItemVO cartItemVO,String serialNo){
+        CartTaskDO cartTaskDO = new CartTaskDO();
+        Long userId = LoginInterceptor.threadLocalUserLoginModel.get().getId();
+        cartTaskDO.setUserId(userId);
+        cartTaskDO.setBuyNum(cartItemVO.getBuyNum());
+        cartTaskDO.setLockState(CartTaskLockStateEnum.LOCKED.name());
+        cartTaskDO.setProductId(cartItemVO.getProductId());
+        cartTaskDO.setProductName(cartItemVO.getProductTitle());
+        cartTaskDO.setSerialNum(serialNo);
+        cartTaskDO.setCreateTime(new Date());
+        return cartTaskService.insert(cartTaskDO);
     }
 
     private String getCartKey() {

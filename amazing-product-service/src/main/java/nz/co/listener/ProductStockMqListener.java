@@ -2,7 +2,13 @@ package nz.co.listener;
 
 import com.rabbitmq.client.Channel;
 import lombok.extern.slf4j.Slf4j;
+import nz.co.enums.CartTaskLockStateEnum;
+import nz.co.model.CartTaskDO;
+import nz.co.model.OrderItemRequest;
 import nz.co.model.ProductRecordMessage;
+import nz.co.request.AddCartRequest;
+import nz.co.service.CartService;
+import nz.co.service.CartTaskService;
 import nz.co.service.ProductService;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
@@ -18,6 +24,7 @@ import java.io.IOException;
 public class ProductStockMqListener {
     @Autowired
     private ProductService productService;
+
     @RabbitHandler
     public void releaseProductStock(ProductRecordMessage recordMessage, Message message, Channel channel) throws IOException {
         log.info("Message has been received: "+recordMessage);
@@ -46,4 +53,6 @@ public class ProductStockMqListener {
             e.printStackTrace();
         }
     }
+
+
 }

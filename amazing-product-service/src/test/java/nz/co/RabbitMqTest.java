@@ -2,6 +2,7 @@ package nz.co;
 
 import lombok.extern.slf4j.Slf4j;
 import nz.co.config.RabbitMqConfig;
+import nz.co.model.OrderItemRequest;
 import nz.co.model.ProductRecordMessage;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,5 +30,15 @@ public class RabbitMqTest {
         productRecordMessage.setProductTaskId(1L);
         rabbitTemplate.convertAndSend(rabbitMqConfig.getStockEventExchange(),rabbitMqConfig.getStockReleaseDelayRoutingKey(),productRecordMessage);
 
+    }
+    @Test
+    public void testSendRestoreCartItemMessage(){
+        OrderItemRequest orderItemRequest = new OrderItemRequest();
+        orderItemRequest.setUserId(1L);
+        orderItemRequest.setSerailNo("123456abc");
+        orderItemRequest.setProductId(1L);
+        orderItemRequest.setBuyNum(2);
+       // orderItemRequest.setProductTitle(obj.getProductTitle());
+        rabbitTemplate.convertAndSend(rabbitMqConfig.getCartEventExchange(),rabbitMqConfig.getCartReleaseDelayRoutingKey(),orderItemRequest);
     }
 }

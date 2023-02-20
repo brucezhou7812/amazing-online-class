@@ -28,8 +28,20 @@ public class RabbitMqConfig {
     private String stockReleaseDelayRoutingKey;
     @Value("${mqconfig.stock_release_routing_key}")
     private String stockReleaseRoutingKey;
-    @Value("${mqconfig.ttl}")
-    private Integer ttl;
+    @Value("${mqconfig.cart_release_delay_queue}")
+    private String cartReleaseDelayQueue;
+    @Value("${mqconfig.cart_release_queue}")
+    private String cartReleaseQueue;
+    @Value("${mqconfig.cart_event_exchange}")
+    private String cartEventExchange;
+    @Value("${mqconfig.cart_release_delay_routing_key}")
+    private String cartReleaseDelayRoutingKey;
+    @Value("${mqconfig.cart_release_routing_key}")
+    private String cartReleaseRoutingKey;
+    @Value("${mqconfig.stock_ttl}")
+    private Integer stockTtl;
+    @Value("${mqconfig.cart_ttl}")
+    private Integer cartTtl;
 
     @Bean
     public MessageConverter messageConverter(){
@@ -41,6 +53,10 @@ public class RabbitMqConfig {
         return new TopicExchange(stockEventExchange,true,false);
     }
 
+    @Bean
+    public Exchange cartEventExchange(){
+        return new TopicExchange(cartEventExchange,true,false);
+    }
     /**
      * Delay queue
      * @return
@@ -50,8 +66,21 @@ public class RabbitMqConfig {
         Map<String,Object> args = new HashMap<>();
         args.put(ConstantOnlineClass.RABBITMQ_X_DEAD_LETTER_ROUTING_KEY,stockReleaseRoutingKey);
         args.put(ConstantOnlineClass.RABBITMQ_X_DEAD_LETTER_EXCHANGE,stockEventExchange);
-        args.put(ConstantOnlineClass.RABBITMQ_X_MESSAGE_TTL,ttl);
+        args.put(ConstantOnlineClass.RABBITMQ_X_MESSAGE_TTL,stockTtl);
         return new Queue(stockReleaseDelayQueue,true,false,false,args);
+    }
+
+    /**
+     * Delay queue
+     * @return
+     */
+    @Bean
+    public Queue cartReleaseDelayQueue(){
+        Map<String,Object> args = new HashMap<>();
+        args.put(ConstantOnlineClass.RABBITMQ_X_DEAD_LETTER_ROUTING_KEY,cartReleaseRoutingKey);
+        args.put(ConstantOnlineClass.RABBITMQ_X_DEAD_LETTER_EXCHANGE,cartEventExchange);
+        args.put(ConstantOnlineClass.RABBITMQ_X_MESSAGE_TTL,cartTtl);
+        return new Queue(cartReleaseDelayQueue,true,false,false,args);
     }
 
     /**
@@ -63,13 +92,30 @@ public class RabbitMqConfig {
 
     }
 
+    /**
+     * Dead letter queue
+     */
+    @Bean
+    public Queue cartReleaseQueue(){
+        return new Queue(cartReleaseQueue,true,false,false);
+
+    }
+
     @Bean
     public Binding stockReleaseBinding(){
         return new Binding(stockReleaseQueue,Binding.DestinationType.QUEUE,stockEventExchange,stockReleaseRoutingKey,null);
     }
-
+    @Bean
+    public Binding cartReleaseBinding(){
+        return new Binding(cartReleaseQueue,Binding.DestinationType.QUEUE,cartEventExchange,cartReleaseRoutingKey,null);
+    }
     @Bean
     public Binding stockReleaseDelayBinding(){
         return new Binding(stockReleaseDelayQueue,Binding.DestinationType.QUEUE,stockEventExchange,stockReleaseDelayRoutingKey,null);
+    }
+
+    @Bean
+    public Binding cartReleaseDelayBinding(){
+        return new Binding(cartReleaseDelayQueue,Binding.DestinationType.QUEUE,cartEventExchange,cartReleaseDelayRoutingKey,null);
     }
 }
