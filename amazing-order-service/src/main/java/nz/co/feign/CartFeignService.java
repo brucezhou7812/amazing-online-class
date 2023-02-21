@@ -9,9 +9,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
-
-@FeignClient(value = "amazing-produce-service")
+/*
+@FeignClient(value = "amazing-product-service")
 public interface CartFeignService {
-    @PostMapping(value="/api/cart/v1/confirm_items_in_cart")
+    @PostMapping("/api/cart/v1/confirm_items_in_cart")
     JsonData<List<CartItemVO>> confirmCartItems(@RequestBody List<Long> productIds,@RequestParam("serial_no") String serialNo);
 }
+
+ */

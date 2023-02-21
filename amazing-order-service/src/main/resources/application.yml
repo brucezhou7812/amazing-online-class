@@ -47,3 +47,11 @@ mybatis-plus:
 logging:
   level:
     root: INFO
+
+mqconfig:
+  order_close_delay_queue: order.close.delay_queue
+  order_close_queue: order.close.queue
+  order_event_exchange: order.event.exchange
+  order_close_delay_routing_key: order.close.delay.routing.key
+  order_close_routing_key: order.close.routing.key
+  ttl: 15000

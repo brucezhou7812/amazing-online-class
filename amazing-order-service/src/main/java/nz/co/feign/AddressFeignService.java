@@ -9,6 +9,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 @FeignClient(value="amazing-user-service")
 public interface AddressFeignService {
     @GetMapping("/api/address/v1/find/{address_id}")
-    public JsonData<AddressVO> detail(@ApiParam(value="Address id",required = true)
+    JsonData<AddressVO> detail(@ApiParam(value="Address id",required = true)
                                       @PathVariable("address_id")Long id);
 }

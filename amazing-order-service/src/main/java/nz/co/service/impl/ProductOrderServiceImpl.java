@@ -1,15 +1,19 @@
 package nz.co.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import nz.co.enums.BizCodeEnum;
 import nz.co.enums.CouponUseStateEnum;
+import nz.co.enums.OrderPayTypeEnum;
+import nz.co.enums.OrderStateEnum;
 import nz.co.exception.BizCodeException;
 import nz.co.feign.AddressFeignService;
-import nz.co.feign.CartFeignService;
+
 import nz.co.feign.CouponFeignService;
 import nz.co.feign.ProductFeignService;
 import nz.co.interceptor.LoginInterceptor;
+import nz.co.mapper.ProductOrderItemMapper;
 import nz.co.model.*;
 import nz.co.mapper.ProductOrderMapper;
 import nz.co.request.GenerateOrderRequest;
@@ -22,7 +26,9 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -38,9 +44,10 @@ public class ProductOrderServiceImpl implements ProductOrderService {
     @Autowired
     private ProductOrderMapper productOrderMapper;
     @Autowired
-    private AddressFeignService addressFeignService;
+    private ProductOrderItemMapper productOrderItemMapper;
     @Autowired
-    private CartFeignService cartFeignService;
+    private AddressFeignService addressFeignService;
+
     @Autowired
     private CouponFeignService couponFeignService;
     @Autowired
@@ -58,13 +65,15 @@ public class ProductOrderServiceImpl implements ProductOrderService {
             return JsonData.buildResult(BizCodeEnum.ADDRESS_NOT_EXIST);
         }
         List<Long> productIds = generateOrderRequest.getProductIds();
-        String serialNo = generateOrderRequest.getSerialNo();//CommonUtils.getRandomCode(32);
-        JsonData<List<CartItemVO>> jsonData = cartFeignService.confirmCartItems(productIds,serialNo);
+        String serialNo = CommonUtils.getRandomCode(32);
+        JsonData<List<CartItemVO>> jsonData = productFeignService.confirmCartItems(productIds,serialNo);
         if(jsonData.getCode() == 0){
             List<CartItemVO> orderItems = jsonData.getData();
             this.checkPrice(orderItems,generateOrderRequest);
-            this.lockCouponRecord(generateOrderRequest);
-            this.lockProductStock(generateOrderRequest,orderItems,userLoginModel.getId());
+            this.lockCouponRecord(generateOrderRequest,serialNo);
+            this.lockProductStock(generateOrderRequest,orderItems,userLoginModel.getId(),serialNo);
+            ProductOrderDO productOrderDO = this.saveProductOrder(generateOrderRequest,addressVO,userLoginModel,serialNo);
+            this.saveOrderItems(orderItems,productOrderDO);
             return JsonData.buildSuccess(orderItems);
         }else{
             log.error("Confirm Cart items failed:"+generateOrderRequest);
@@ -74,9 +83,43 @@ public class ProductOrderServiceImpl implements ProductOrderService {
 
     }
 
-    private void lockProductStock(GenerateOrderRequest orderRequest,List<CartItemVO> cartItemVOs,Long userId){
+    private void saveOrderItems(List<CartItemVO> cartItems,ProductOrderDO productOrderDO){
+        List<ProductOrderItemDO> orderItemDOList = cartItems.stream().map(obj->{
+            ProductOrderItemDO orderItemDO = new ProductOrderItemDO();
+            orderItemDO.setOutTradeNo(productOrderDO.getOutTradeNo());
+            orderItemDO.setBuyNum(obj.getBuyNum());
+            orderItemDO.setCreateTime(new Date());
+            orderItemDO.setTotalFee(obj.getTotalFee());
+            orderItemDO.setFee(obj.getPrice());
+            orderItemDO.setProductId(obj.getProductId());
+            orderItemDO.setProductImg(obj.getProductImg());
+            orderItemDO.setProductTitle(obj.getProductTitle());
+            orderItemDO.setProductOrderId(productOrderDO.getId());
+            return orderItemDO;
+        }).collect(Collectors.toList());
+        productOrderItemMapper.insertBatch(orderItemDOList);
+    }
+
+    private ProductOrderDO saveProductOrder(GenerateOrderRequest generateOrderRequest,AddressVO addressVO,UserLoginModel loginUser,String serialNo){
+        ProductOrderDO productOrderDO = new ProductOrderDO();
+        productOrderDO.setUserId(loginUser.getId());
+        productOrderDO.setHeadImg(loginUser.getHeadImg());
+        productOrderDO.setNickname(loginUser.getName());
+        productOrderDO.setOutTradeNo(serialNo);
+        productOrderDO.setReceiverAddress(JSON.toJSONString(addressVO));
+        productOrderDO.setCreateTime(new Date());
+        productOrderDO.setPayFee(generateOrderRequest.getFeeToPay());
+        productOrderDO.setTotalFee(generateOrderRequest.getTotalFee());
+        productOrderDO.setPayType(OrderPayTypeEnum.ALIPAY.name());
+        productOrderDO.setState(OrderStateEnum.NEW.name());
+        productOrderDO.setDel(0);
+        productOrderMapper.insert(productOrderDO);
+        return productOrderDO;
+    }
+
+    private void lockProductStock(GenerateOrderRequest orderRequest,List<CartItemVO> cartItemVOs,Long userId,String serialNo){
         LockProductsRequest lockProductsRequest = new LockProductsRequest();
-        lockProductsRequest.setSerialNo(orderRequest.getSerialNo());
+        lockProductsRequest.setSerialNo(serialNo);
         List<OrderItemRequest> orderItemRequests = new ArrayList<>();
         for(CartItemVO cartItemVO:cartItemVOs){
             OrderItemRequest orderItemRequest = new OrderItemRequest();
@@ -94,11 +137,11 @@ public class ProductOrderServiceImpl implements ProductOrderService {
         }
     }
 
-    private void lockCouponRecord(GenerateOrderRequest orderRequest){
+    private void lockCouponRecord(GenerateOrderRequest orderRequest,String serialNo){
         Long couponRecordId = orderRequest.getCouponRecordId();
         if(couponRecordId > 0) {
             LockCouponRecordRequest lockCouponRecordRequest = new LockCouponRecordRequest();
-            lockCouponRecordRequest.setSerialNum(orderRequest.getSerialNo());
+            lockCouponRecordRequest.setSerialNum(serialNo);
             List<Long> couponRecordIds = new ArrayList<>();
             couponRecordIds.add(couponRecordId);
             JsonData<CouponTaskDO> jsonData = couponFeignService.lockCouponRecordBatch(lockCouponRecordRequest);
