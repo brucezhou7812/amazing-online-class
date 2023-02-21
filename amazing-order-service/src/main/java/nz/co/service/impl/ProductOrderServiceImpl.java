@@ -3,6 +3,7 @@ package nz.co.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
+import nz.co.config.RabbitMqConfig;
 import nz.co.enums.BizCodeEnum;
 import nz.co.enums.CouponUseStateEnum;
 import nz.co.enums.OrderPayTypeEnum;
@@ -20,6 +21,7 @@ import nz.co.request.GenerateOrderRequest;
 import nz.co.service.ProductOrderService;
 import nz.co.utils.CommonUtils;
 import nz.co.utils.JsonData;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -52,6 +54,10 @@ public class ProductOrderServiceImpl implements ProductOrderService {
     private CouponFeignService couponFeignService;
     @Autowired
     private ProductFeignService productFeignService;
+    @Autowired
+    private RabbitMqConfig rabbitMqConfig;
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
     @Override
     public JsonData generateOrder(GenerateOrderRequest generateOrderRequest) {
         UserLoginModel userLoginModel = LoginInterceptor.threadLocalUserLoginModel.get();
@@ -74,6 +80,9 @@ public class ProductOrderServiceImpl implements ProductOrderService {
             this.lockProductStock(generateOrderRequest,orderItems,userLoginModel.getId(),serialNo);
             ProductOrderDO productOrderDO = this.saveProductOrder(generateOrderRequest,addressVO,userLoginModel,serialNo);
             this.saveOrderItems(orderItems,productOrderDO);
+            ProductOrderMessage productOrderMessage = new ProductOrderMessage();
+            productOrderMessage.setSerialNo(serialNo);
+            rabbitTemplate.convertAndSend(rabbitMqConfig.getOrderEventExchange(),rabbitMqConfig.getOrderCloseDelayRoutingKey(),productOrderMessage);
             return JsonData.buildSuccess(orderItems);
         }else{
             log.error("Confirm Cart items failed:"+generateOrderRequest);

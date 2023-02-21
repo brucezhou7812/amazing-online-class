@@ -2,6 +2,7 @@ package nz.co;
 
 import lombok.extern.slf4j.Slf4j;
 import nz.co.config.RabbitMqConfig;
+import nz.co.model.ProductOrderMessage;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -21,5 +22,11 @@ public class TestRabbitMq {
     public void testSendStringMsg(){
         String message = "Hello Order Rabbit Queue";
         rabbitTemplate.convertAndSend(rabbitMqConfig.getOrderEventExchange(),rabbitMqConfig.getOrderCloseDelayRoutingKey(),message);
+    }
+    @Test
+    public void testSendProductOrderMessage(){
+        ProductOrderMessage productOrderMessage = new ProductOrderMessage();
+        productOrderMessage.setSerialNo("serialNo");
+        rabbitTemplate.convertAndSend(rabbitMqConfig.getOrderEventExchange(),rabbitMqConfig.getOrderCloseDelayRoutingKey(),productOrderMessage);
     }
 }
