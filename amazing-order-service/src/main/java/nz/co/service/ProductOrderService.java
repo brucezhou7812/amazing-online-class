@@ -17,4 +17,6 @@ public interface ProductOrderService{
     JsonData generateOrder(GenerateOrderRequest generateOrderRequest);
 
     String queryOrderState(String serialNum);
+
+    boolean closeProductOrder(String serialNo);
 }

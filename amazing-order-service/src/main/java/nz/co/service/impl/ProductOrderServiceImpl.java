@@ -21,6 +21,7 @@ import nz.co.request.GenerateOrderRequest;
 import nz.co.service.ProductOrderService;
 import nz.co.utils.CommonUtils;
 import nz.co.utils.JsonData;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -230,6 +231,33 @@ public class ProductOrderServiceImpl implements ProductOrderService {
         .eq("out_trade_no",serialNum));
         //ProductOrderVO productOrderVO = beanProcess(productOrderDO);
         return productOrderDO.getState();
+    }
+
+    @Override
+    public boolean closeProductOrder(String serialNo) {
+        ProductOrderDO productOrderDO = productOrderMapper.selectOne(new QueryWrapper<ProductOrderDO>()
+        .eq("out_trade_no",serialNo));
+        if(productOrderDO == null){
+            log.error("Prodcut Order does not exist. "+serialNo);
+            return true;
+        }
+        String orderState = productOrderDO.getState();
+        if(OrderStateEnum.PAY.name().equalsIgnoreCase(orderState)){
+            log.error("Product order has been paid. "+serialNo);
+            return true;
+        }
+        //TODO third party payment
+        String payResult = "";
+        if(StringUtils.isBlank(payResult)){
+            productOrderMapper.updateOrderState(serialNo,orderState,OrderStateEnum.CANCEL.name());
+            log.info("Product order has not been paid. "+serialNo);
+            return true;
+        }else{
+            productOrderMapper.updateOrderState(serialNo,orderState,OrderStateEnum.PAY.name());
+            log.info("Product order has been paid. "+serialNo);
+            return true;
+        }
+
     }
 
     private ProductOrderVO beanProcess(ProductOrderDO productOrderDO){
