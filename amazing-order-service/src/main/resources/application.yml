@@ -55,3 +55,7 @@ mqconfig:
   order_close_delay_routing_key: order.close.delay.routing.key
   order_close_routing_key: order.close.routing.key
   ttl: 15000
+
+alipay:
+  success_return_url: https://xdclass.net
+  callback_url: https://xdclass.net
