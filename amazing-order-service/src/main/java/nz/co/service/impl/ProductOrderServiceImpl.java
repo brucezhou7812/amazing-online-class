@@ -3,6 +3,7 @@ package nz.co.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
+import nz.co.component.PayTool;
 import nz.co.config.RabbitMqConfig;
 import nz.co.enums.BizCodeEnum;
 import nz.co.enums.CouponUseStateEnum;
@@ -21,6 +22,7 @@ import nz.co.request.GenerateOrderRequest;
 import nz.co.service.ProductOrderService;
 import nz.co.utils.CommonUtils;
 import nz.co.utils.JsonData;
+import nz.co.vo.PayInfoVO;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
@@ -84,6 +86,13 @@ public class ProductOrderServiceImpl implements ProductOrderService {
             ProductOrderMessage productOrderMessage = new ProductOrderMessage();
             productOrderMessage.setSerialNo(serialNo);
             rabbitTemplate.convertAndSend(rabbitMqConfig.getOrderEventExchange(),rabbitMqConfig.getOrderCloseDelayRoutingKey(),productOrderMessage);
+            PayInfoVO payInfoVO = new PayInfoVO();
+            payInfoVO.setSerailNo(serialNo);
+            payInfoVO.setPayFee(productOrderDO.getPayFee());
+            payInfoVO.setPayType(productOrderDO.getPayType());
+            payInfoVO.setClientType("H5");
+            PayTool payTool = new PayTool(payInfoVO);
+            String payResult = payTool.pay();
             return JsonData.buildSuccess(orderItems);
         }else{
             log.error("Confirm Cart items failed:"+generateOrderRequest);
@@ -247,7 +256,7 @@ public class ProductOrderServiceImpl implements ProductOrderService {
             return true;
         }
         //TODO third party payment
-        String payResult = "";
+        String payResult ="";
         if(StringUtils.isBlank(payResult)){
             productOrderMapper.updateOrderState(serialNo,orderState,OrderStateEnum.CANCEL.name());
             log.info("Product order has not been paid. "+serialNo);

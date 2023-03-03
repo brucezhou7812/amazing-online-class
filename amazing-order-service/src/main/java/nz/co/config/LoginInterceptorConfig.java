@@ -23,7 +23,7 @@ public class LoginInterceptorConfig implements WebMvcConfigurer {
         registry.addInterceptor(loginInterceptor())
                 .addPathPatterns("/api/order/*/**")
                 //.excludePathPatterns("/api/order/product_order/*/list")
-                .excludePathPatterns("/api/callback/*/**","/api/order/*/query_state");
+                .excludePathPatterns("/api/callback/*/**","/api/order/*/query_state","/api/order/product_order/v1/testAlipay");
         WebMvcConfigurer.super.addInterceptors(registry);
     }
 

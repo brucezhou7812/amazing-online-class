@@ -1,15 +1,22 @@
 package nz.co.controller;
 
 
+import com.alibaba.fastjson.JSON;
+import com.alipay.api.AlipayApiException;
+import com.alipay.api.request.AlipayTradeWapPayRequest;
+import com.alipay.api.response.AlipayTradeWapPayResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
+import nz.co.config.AlipayConfig;
+import nz.co.config.PayUrlConfig;
 import nz.co.enums.BizCodeEnum;
 import nz.co.enums.OrderClientTypeEnum;
 import nz.co.enums.OrderPayTypeEnum;
 import nz.co.request.GenerateOrderRequest;
 import nz.co.service.ProductOrderService;
+import nz.co.utils.CommonUtils;
 import nz.co.utils.JsonData;
 import nz.co.model.ProductOrderVO;
 import org.apache.commons.lang3.StringUtils;
@@ -19,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.HashMap;
 
 /**
  * <p>
@@ -35,6 +43,8 @@ import java.io.PrintWriter;
 public class ProductOrderController {
     @Autowired
     private ProductOrderService productOrderService;
+    @Autowired
+    private PayUrlConfig payUrlConfig;
     @ApiOperation(value = "Generate Order")
     @PostMapping(value = "generate_order")
     public void generateOrder(@ApiParam(value="the request for generating order")@RequestBody GenerateOrderRequest generateOrderRequest, HttpServletResponse response){
@@ -79,6 +89,34 @@ public class ProductOrderController {
     public JsonData<String> queryOrderStateBySerialNo(@ApiParam("the serial number of the order")@RequestParam("serial_no")String serialNo){
         String state = productOrderService.queryOrderState(serialNo);
         return StringUtils.isBlank(state) ? JsonData.buildResult(BizCodeEnum.ORDER_NOT_EXIST):JsonData.buildSuccess(state);
+    }
+    @GetMapping("testAlipay")
+    public void testAlipay(HttpServletResponse response) throws AlipayApiException, IOException {
+        HashMap<String,String> content = new HashMap<>();
+        String no = CommonUtils.generateUUID();
+        content.put("out_trade_no",no);
+        content.put("product_code","FAST_INSTANCE_TRADE_PAY");
+        content.put("total_amount","100");
+        content.put("subject","computer science lesson");
+        content.put("timeout_express","5m");
+        content.put("body","computer science lesson");
+        AlipayTradeWapPayRequest request = new AlipayTradeWapPayRequest();
+        request.setBizContent(JSON.toJSONString(content));
+        request.setNotifyUrl(payUrlConfig.getAlipayCallbackUrl());
+        request.setReturnUrl(payUrlConfig.getAlipaySuccessReturnUrl());
+        AlipayTradeWapPayResponse res = AlipayConfig.getInstance().pageExecute(request);
+        if(res.isSuccess()){
+            log.info("Success to invoke alipay sdk. ");
+            String form = res.getBody();
+            response.setContentType("text/html;charset=UTF-8");
+            response.getWriter().write(form);
+            response.getWriter().flush();
+            response.getWriter().close();
+
+        }else{
+            log.info("Failed to invoke alipay sdk. ");
+
+        }
     }
 }
 

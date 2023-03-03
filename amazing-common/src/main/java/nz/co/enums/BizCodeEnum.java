@@ -64,7 +64,8 @@ public enum BizCodeEnum {
      */
     ORDER_NOT_EXIST(830001,"Order not exist"),
     ORDER_LOCK_STOCK_FAILED(830002,"Lock stock failed"),
-    ORDER_CONFIRM_FAILED(830003,"Confirm order failed");
+    ORDER_CONFIRM_FAILED(830003,"Confirm order failed"),
+    ORDER_TIMEOUT(830004,"Order has been expired");
 
     @Getter
     @Setter

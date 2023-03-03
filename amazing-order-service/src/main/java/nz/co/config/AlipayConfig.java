@@ -1,34 +1,37 @@
 package nz.co.config;
 
+import com.alipay.api.AlipayClient;
+import com.alipay.api.DefaultAlipayClient;
+import org.springframework.boot.autoconfigure.web.ServerProperties;
+
 public class AlipayConfig {
-    /**
-     * 支付宝 APPID
-     */
-    public static final  String APPID="2021000122616063";
+    public static final String FORMAT = "json";
 
-    /**
-     * 应用私钥
-     */
-    public static final String APP_PRI_KEY = "MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCCXq6I91WRG9S+40g5NwVoUKpo46TDc64/m9r0J9L0141U792V1Wi9O+mNVCQOD8KddWOZJ/nZBlHuQExRMg05ukoWKPhDkU2BxKWLonguyEBArleyJLqglXVtDzJBR8q7QD2+JGXNmnWAOh57wAaBO8sh9PJox3YGLrTdHfeQyzqeuQr/2XZhTDdkF4WK3w5LT8lE7PFwFxgIYqgOpX5I49EQwryE1OWo/DQlFXsYpdFZEbmUHdqVwBpIvsPUuMElIrbUW5lCwfgY7y5tlAht75K7/WkZIqF80eeoHTp+w/yMopPzwQcQaKD/qSgGCgGb7Hk9RP2HR7TZuCjoxCUNAgMBAAECggEAcH6Q7qE2FbPFPT5T6QMASIYqtb2RRBKDDmJHah0fHKUPUHZ2Zz8yVO/o1UoAnp2c2lAcNGFZZ5rbgdG7yOh+nwyPt1V8/JjaH5r3GmmEeSHUx7to8tBctgqhvAy72bbAShnh7TvtGKAqug3sle4Z7tQQsWly71UGE8mjyZV9NVPRWCBi+chqaLWI3c0OJGVbMp7KHM1WwyvIiQ2MpXoIRBy7hwTOQKZ9tTeJFZ9VMSb8iO6I8YPqLBRg+2/+R8htkolhqlXsQrFCSSVK6rQvNxKjMfpgDSFHhuTlT1nus02W4jeyQQvSra28VfnJ4xYnseyWg8JxmiWdVTC6DLlihQKBgQDv/NX/9jAvZoJbvnT28YIHXnNYbxYqI8VRhjSaj22qARDQD+zXSjQlmP0DzBsxi+L+vfcsQruQwyeYvBwfpKw2OJ7wrH7ecwjOS4QYG+VaTfw+WhjM8Mw8UcPqV/tM546STytGWeOQiDdbDu9Jsn6AhlP+32RkvknmqstUUW0JzwKBgQCLEX51sekId6BxhGPPYsai+xEH4+yzHW1ud0BpHdLUvLQ1ifZlsgs5vMvLMrXDwD/Aqotr5UqkLejbp0IPvjZySxKUDIM8KO/UgB1UHHDwNi/vMvuaF00ifan1PGYTW39pIJrARKxaIMdEW3ONjbzl6U7L4FMFdHSSFdGYeNmGYwKBgQCQG+l9jJ4euJWq9dFSwG9ucV8eSYarw1Mnw0kvTtVxcrZf2lBEb4Ck2xuD/jqOJAwpIHWelGwBX88VPlA9CCuJW7LFny+H8Nfm2R33RDkTYyUHZB7kYeyihA77V93Frn7EiNnZovytu75R5cP3I0Ind4JU2Fx2ynWiGAmFFmg9rQKBgFjwSjkJG+ivYOvYaGDEYhbvjFfIe6OdiVPhbk8LpL8rI/Etl2g4cpdtV8RPXRGgzOTx7RKG5LKVLdv0XvpkgrubqXkHe5Ko96Cmgps9STlG3mcS6vgEOO97AIv3Iaz1kklwcafPA47scaQU/JSl9g3vpNYcU9wkOz0GOTJS74LTAoGACws9PwaZrSq52xufRey2sbWlcQWnnpyA1e5dXB9x4yFy1AJKGU4DqoiOTsoFE5UC52225mTKo2bsXgV8LlzrUV331x9w2WtsjXhaExKgb2RVy3R7LAxTZNOHxflO63efSOSB0Jv1VH5ewIARaTXymT9v4vuZT1j25LTGVt2Vu6c=";
-    /*
-    支付宝公钥
-     */
-    public static final String ALIPAY_PUB_KEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuN36/l88HBSQaM2PcdkihdmjMj9RIHFBJPppLBvXcl8r8m5MSFzVRxFyLEgELXqayQUkLArQ/T9AX7WUo9cJcDZzcO90i9v0BQY4w800KN/e3y1vJPXOC2eJefJzbGUXhBil8xCR17iWw2M9YtaTyq+m/iKbwx3LTLE9m3YfYMDbu7FLeavHEMHZz8yiFIt8ObHK8KcUiGsOp2pqYvf5+U0Qml45PoJfhbxfrm8ps0BNXmXg3ClKeyh51bq8a5du9/AaLecq3RHUTm3ELn1n8FSE5oqRVR3ukyhnT1it1m1qvB/w7Wi7qs8DWBeZcUqckE+vvWbilR4QV2zm4hVa4QIDAQAB";
+    public static final  String APPID="2021003179686005";
 
-    /**
-     * 签名类型
-     */
+    public static final String PAY_GATEWAY="https://openapi.alipay.com/gateway.do";
+
+    public static final String APP_PRI_KEY = "MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCwIyuuQ21doCjs03a+hcZtaxtti3sV26afC+dpV0RPUEKmQFh1GARXP8kV0NYZnYHDbfQW0vB3B9ZK9cRhJEx4Dl2o1RkJJ6cdOBKebWzT40fL9xOa6CytLPyMWIHzjI1phm1aqFeNEnT0kz0hd1C8aOlB7hKL7KcQctoYOxz0+lzS4u/dyDwJ2iLDshQNftB8hLEKx0ZaCHMNJcBOGjRKPa3X16NvKiaivscqwD9vWL82pdxf1MmqxBL3d3lxRiFI9iF85zMTAw8wyt9W0HqEH/a9Bcbu6KYOhXuMPH4Eqgl/hX7v2a0YTkPzi9wFEJ4l4t+7DoULcHwCi/NY+XCHAgMBAAECggEAAvQkCGETFW3ZIdeN9zXxFOal6BldsAkl6ybc85RGDfpvk7Aii5wifoAQVDBTVsygX3GZlURmSei0vD8Q0vwz2BONmIYyTEgA8ml9TnDRUWBPVOlIx+E61pCZj5TwYPArcuiRLuMBzNjRY0SQ0t3YWcB8oOFoKDaIuqriY2OiYa1F/jo/Wt51lgbE9UPzrDKDaicxaam9VM76+HE3vkD0H6Ez+A5wf+eZinHZzhWwXHglc+Q4Pw9w6KJi7WylqWyWUzRJTaS1v0C9tWEdZBCj/8Ft9OqVYZfr97GhTYtX/2OTje3DluUcMMulh2fXvFj3k4hCU8GQw2g1fdEDzVTXOQKBgQDd+RkZVUb9XyiXZLIFrekRoYD7h/GgfEc2lNvkuOuF2CzBoLdOksDJaMwCNh5ZN7rpYou9FL4VQrGTVyEn34OhkroQzzHQJ/keSKtd/oJJNCcVbhK57aJtyUwFeUsXA666XfEc78g5w+22Kfb/lIFU9g7DuU+UjD54RWuPMeSG5QKBgQDLI1dUSw1eO7tU2vHcfVuZ5Vrt6nT6wuTtZ7S7yw/YeL7J6bIFlOBK0FXxdkOwI3cvgFH+2Xy9PZvNPTRKGUWztLHQZ1udKVpQYjlqPfnakRhk1qCFZKsvRnud3a6n0rndzhz/UETo/F03lns0ckJvCiF6V/VTgJl2kmF4VnOW+wKBgGXDFjOb+dCcuII3grnB0fDoRraJy0dU0lz+f5TrBea1hUc7g+38r29moOh+oQkr2H+4UvHbOY2LptcygZvDB5iiKLUeF+si+D1e+Vk9HcOrqiNT9DfS7r1AJJ75zWf+ozMDcE9gyj1ZSnhR4s+m6Gfn6jrmkMo8RUNkJ/xc1jTVAoGAQBvgNLcW+fVp8qbCi+54GUKcBtfmoTke3JnNHTNBxfSdacW6LC7G9nV3miPTyuP2emRJ/F8REfw+jnBRb004hTVypK3p6NijKxlEu3Xhw4vlIfXmZRLXP61D2BedRlOn2wtwdVcU2F7E4IU6Ttv8gWS2GhFmWDsOs7AQ2NSX2D8CgYEAs+JScTpjE+KsJIiDU+7f08DlutES/JWJ3IL5oT/YJBYaIx36MDZKO395xdHsjhrd9AwmQoXpgkPWYVTF+xAV289VBDefawL2MJiUhpMvts7LtRGeQOb/aj9+f8wwoeOg+buzuDoWzap7E1pNIA8ZpVHBHLYOY2Lc6kjNjGooBoA=";
+    public static final String ALIPAY_PUB_KEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtN3xhxEUcjo3xH66cLEJAo+M6KYUkwx2GJNrACu7VjS1dMsb7knztBv4oJDFDyKDOHbPGE/IUoqhGzqZpJG+ug1rM0x0tG+4tHCFS/8ZX+x8vvrTGX4YMCM2fQh9I0r01fnhPsh8XQ3J4BX6vQUpqAmji+SW3ciWd2ln7CHQn0HCK1og/Z1KrEVOGnpyWN6vWllJQW6ecav7FqbZTFVJIM9F133bnVk1+VmC1rM6xByUH97+aVfK0af+xbApXn2GjSR1sgli3Lqmrfh/z7ExKnje02gRFByLeluDAysu60Sq0NDtclPgA5nQOn+FCrCNsJjaNMQJ0zM2J7t+9SrffQIDAQAB";
+
     public static final  String SIGN_TYPE="RSA2";
 
-
-    /**
-     * 字符编码
-     */
     public static final  String CHARSET="UTF-8";
 
+    private volatile static AlipayClient instance = null;
 
     private AlipayConfig(){
 
+    }
+    public static AlipayClient getInstance(){
+        if(instance == null){
+            synchronized (AlipayConfig.class){
+                if(instance == null){
+                    instance = new DefaultAlipayClient(PAY_GATEWAY,APPID,APP_PRI_KEY,FORMAT,CHARSET,ALIPAY_PUB_KEY,SIGN_TYPE);
+                }
+            }
+        }
+        return instance;
     }
 
 }
