@@ -13,4 +13,8 @@ public class ConstantOnlineClass {
     public static final String RABBITMQ_X_DEAD_LETTER_EXCHANGE="x-dead-letter-exchange";
     public static final String RABBITMQ_X_DEAD_LETTER_ROUTING_KEY="x-dead-letter-routing-key";
     public static final String RABBITMQ_X_MESSAGE_TTL="x-message-ttl";
+    public static final String OUT_TRADE_NO="out_trade_no";
+    public static final String TRADE_SATATUS = "trade_status";
+    public static final String TRADE_SUCCESS="TRADE_SUCCESS";
+    public static final String TRADE_FINISHED="TRACE_FINISHED";
 }

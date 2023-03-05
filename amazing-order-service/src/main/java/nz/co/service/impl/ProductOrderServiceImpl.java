@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import nz.co.component.PayTool;
 import nz.co.config.RabbitMqConfig;
+import nz.co.constant.ConstantOnlineClass;
 import nz.co.enums.BizCodeEnum;
 import nz.co.enums.CouponUseStateEnum;
 import nz.co.enums.OrderPayTypeEnum;
@@ -89,12 +90,19 @@ public class ProductOrderServiceImpl implements ProductOrderService {
             rabbitTemplate.convertAndSend(rabbitMqConfig.getOrderEventExchange(),rabbitMqConfig.getOrderCloseDelayRoutingKey(),productOrderMessage);
             PayInfoVO payInfoVO = new PayInfoVO();
             payInfoVO.setSerailNo(serialNo);
-            payInfoVO.setPayFee(productOrderDO.getPayFee());
-            payInfoVO.setPayType(productOrderDO.getPayType());
-            payInfoVO.setClientType("H5");
+            payInfoVO.setPayFee(generateOrderRequest.getFeeToPay());
+            payInfoVO.setPayType(generateOrderRequest.getPayType());
+            payInfoVO.setClientType(generateOrderRequest.getClientType());
+            payInfoVO.setTitle(orderItems.get(0).getProductTitle());
             PayTool payTool = new PayTool(payInfoVO);
             String payResult = payTool.pay();
-            return JsonData.buildSuccess(orderItems);
+            if(StringUtils.isNotBlank(payResult)) {
+                log.info("Alipay success");
+                return JsonData.buildSuccess(payResult);
+            }else{
+                log.error("Alipay failed");
+                return JsonData.buildResult(BizCodeEnum.ORDER_PAID_FAILED);
+            }
         }else{
             log.error("Confirm Cart items failed:"+generateOrderRequest);
             return JsonData.buildResult(BizCodeEnum.ORDER_CONFIRM_FAILED);
@@ -258,6 +266,12 @@ public class ProductOrderServiceImpl implements ProductOrderService {
         }
         //TODO third party payment
         String payResult ="";
+        PayInfoVO payInfoVO = new PayInfoVO();
+        payInfoVO.setSerailNo(productOrderDO.getOutTradeNo());
+        payInfoVO.setPayType(productOrderDO.getPayType());
+        payInfoVO.setPayFee(productOrderDO.getPayFee());
+        PayTool payTool = new PayTool(payInfoVO);
+        payResult = payTool.queryPayStatus();
         if(StringUtils.isBlank(payResult)){
             productOrderMapper.updateOrderState(serialNo,orderState,OrderStateEnum.CANCEL.name());
             log.info("Product order has not been paid. "+serialNo);
@@ -271,8 +285,19 @@ public class ProductOrderServiceImpl implements ProductOrderService {
     }
 
     @Override
-    public JsonData handleOrderCallback(OrderPayTypeEnum alipay, Map<String, String> params) {
-        return null;
+    public JsonData handleOrderCallback(OrderPayTypeEnum payType, Map<String, String> params) {
+        if(OrderPayTypeEnum.ALIPAY == payType){
+            String serialNo = params.get(ConstantOnlineClass.OUT_TRADE_NO);
+            String status = params.get(ConstantOnlineClass.TRADE_SATATUS);
+            if(status.equalsIgnoreCase(ConstantOnlineClass.TRADE_FINISHED) || status.equalsIgnoreCase(ConstantOnlineClass.TRADE_SUCCESS)){
+                productOrderMapper.updateOrderState(serialNo,OrderStateEnum.PAY.name(),OrderStateEnum.PAY.name());
+                return JsonData.buildSuccess();
+            }
+
+        }else if(OrderPayTypeEnum.WECHAT == payType){
+
+        }
+        return JsonData.buildResult(BizCodeEnum.ORDER_CALLBACK_FAILED);
     }
 
     private ProductOrderVO beanProcess(ProductOrderDO productOrderDO){
