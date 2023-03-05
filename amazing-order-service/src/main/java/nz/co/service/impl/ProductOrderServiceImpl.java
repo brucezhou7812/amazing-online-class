@@ -33,6 +33,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -267,6 +268,11 @@ public class ProductOrderServiceImpl implements ProductOrderService {
             return true;
         }
 
+    }
+
+    @Override
+    public JsonData handleOrderCallback(OrderPayTypeEnum alipay, Map<String, String> params) {
+        return null;
     }
 
     private ProductOrderVO beanProcess(ProductOrderDO productOrderDO){
