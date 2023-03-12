@@ -1,7 +1,10 @@
 package nz.co.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.alipay.api.domain.PageInfo;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.slf4j.Slf4j;
 import nz.co.component.PayTool;
 import nz.co.component.RabbitMQMessagePostProcessor;
@@ -32,10 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -302,6 +302,42 @@ public class ProductOrderServiceImpl implements ProductOrderService {
 
         }
         return JsonData.buildResult(BizCodeEnum.ORDER_CALLBACK_FAILED);
+    }
+
+    @Override
+    public JsonData page(int page, int size, String state) {
+        UserLoginModel userLoginModel = LoginInterceptor.threadLocalUserLoginModel.get();
+        Page<ProductOrderDO> pageInfo = new Page<>(page,size);
+        IPage<ProductOrderDO> ipage = null;
+        if(StringUtils.isNotBlank(state)) {
+            ipage = productOrderMapper.selectPage(pageInfo, new QueryWrapper<ProductOrderDO>()
+                    .eq("user_id", userLoginModel.getId())
+                    .eq("state", state));
+        }else{
+            ipage = productOrderMapper.selectPage(pageInfo, new QueryWrapper<ProductOrderDO>()
+                    .eq("user_id", userLoginModel.getId()));
+        }
+        List<ProductOrderDO> productOrderDOList = ipage.getRecords();
+        List<ProductOrderVO> productOrderVOList = productOrderDOList.stream().map(obj->{
+            ProductOrderVO productOrderVO = new ProductOrderVO();
+            BeanUtils.copyProperties(obj,productOrderVO);
+            Long productOrderId = productOrderVO.getId();
+            List<ProductOrderItemDO> orderItemDOs = productOrderItemMapper.selectList(new QueryWrapper<ProductOrderItemDO>()
+            .eq("product_order_id",productOrderId));
+            List<ProductOrderItemVO> orderItemVOS = orderItemDOs.stream().map(item->{
+                ProductOrderItemVO orderItemVO = new ProductOrderItemVO();
+                BeanUtils.copyProperties(item,orderItemVO);
+                return orderItemVO;
+            }).collect(Collectors.toList());
+            productOrderVO.setOrderItems(orderItemVOS);
+            return productOrderVO;
+        }).collect(Collectors.toList());
+        Map<String,Object> pageMap = new HashMap<>();
+        pageMap.put(ConstantOnlineClass.PAGINATION_TOTAL_PAGES,ipage.getPages());
+        pageMap.put(ConstantOnlineClass.PAGINATION_TOTAL_RECORDS,ipage.getTotal());
+        pageMap.put(ConstantOnlineClass.PAGINATION_CURRENT_DATA,productOrderVOList);
+
+        return JsonData.buildSuccess(pageMap);
     }
 
     private ProductOrderVO beanProcess(ProductOrderDO productOrderDO){

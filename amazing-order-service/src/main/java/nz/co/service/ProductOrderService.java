@@ -24,4 +24,6 @@ public interface ProductOrderService{
     boolean closeProductOrder(String serialNo);
 
     JsonData handleOrderCallback(OrderPayTypeEnum alipay, Map<String, String> params);
+
+    JsonData<ProductOrderVO> page(int page, int size, String state);
 }

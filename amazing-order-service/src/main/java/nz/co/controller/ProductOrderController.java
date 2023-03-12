@@ -90,6 +90,14 @@ public class ProductOrderController {
         String state = productOrderService.queryOrderState(serialNo);
         return StringUtils.isBlank(state) ? JsonData.buildResult(BizCodeEnum.ORDER_NOT_EXIST):JsonData.buildSuccess(state);
     }
+
+    @GetMapping("listOrder")
+    @ApiOperation("List order")
+    public JsonData<ProductOrderVO> queryOrder(@ApiParam(value="current page")@RequestParam(value="page",required = true) int page,
+                                               @ApiParam(value="orders in each page")@RequestParam(value="size",required = true) int size,
+                                               @ApiParam(value="The state of order")@RequestParam(value="state",required = false)String state){
+        return productOrderService.page(page,size,state);
+    }
     @GetMapping("testAlipay")
     public void testAlipay(HttpServletResponse response) throws AlipayApiException, IOException {
         HashMap<String,String> content = new HashMap<>();

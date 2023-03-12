@@ -3,12 +3,14 @@ package nz.co.model;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.core.metadata.OrderItem;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 /**
  * <p>
@@ -89,6 +91,8 @@ public class ProductOrderVO implements Serializable {
      * 收货地址 json存储
      */
     private String receiverAddress;
+
+    private List<ProductOrderItemVO> orderItems;
 
 
 }
