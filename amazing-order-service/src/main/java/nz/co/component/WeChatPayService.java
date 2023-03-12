@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class WeChatPayService implements PayService {
+
     @Override
     public String pay(PayInfoVO payInfoVO) {
         return null;

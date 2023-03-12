@@ -4,6 +4,7 @@ import com.rabbitmq.client.Channel;
 import lombok.extern.slf4j.Slf4j;
 import nz.co.model.ProductOrderMessage;
 import nz.co.service.ProductOrderService;
+import nz.co.utils.CommonUtils;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -24,6 +25,7 @@ public class OrderRabbitMqListener {
     public void closeProductOrder(ProductOrderMessage orderMessage, Message message, Channel channel) throws IOException {
         log.info("Message has been received: "+orderMessage);
         long messageTag = message.getMessageProperties().getDeliveryTag();
+        CommonUtils.setTokenToContextHolder(message);
         boolean flag = productOrderService.closeProductOrder(orderMessage.getSerialNo());
         try {
             if (flag) {

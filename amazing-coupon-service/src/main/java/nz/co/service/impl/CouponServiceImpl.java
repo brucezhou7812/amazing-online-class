@@ -120,7 +120,6 @@ public class CouponServiceImpl implements CouponService {
             CouponRecordDO couponRecordDO = receiveCoupon(couponDO.getId(),couponCategoryNewUser);
             result.add(couponRecordDO);
         }
-        int i =10/0;
         return result.isEmpty()? null:result;
     }
 

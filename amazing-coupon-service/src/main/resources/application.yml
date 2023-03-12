@@ -1,5 +1,5 @@
 server:
-  port: 9091
+  port: 9093
 spring:
   application:
     name: amazing-coupon-service
@@ -48,4 +48,4 @@ mqconfig:
   coupon_event_exchange: coupon.event.exchange
   coupon_release_delay_routing_key: coupon.release.delay.routing.key
   coupon_release_routing_key: coupon.release.routing.key
-  ttl: 15000
+  ttl: 360000

@@ -26,6 +26,7 @@ import java.util.HashMap;
 public class AliPayService implements PayService {
     @Autowired
     private PayUrlConfig payUrlConfig;
+  
     @Override
     public String pay(PayInfoVO payInfoVO) {
         HashMap<String,String> content = new HashMap<>();
@@ -36,15 +37,16 @@ public class AliPayService implements PayService {
         double timeout = Math.floor(payInfoVO.getTimeoutMills()/(1000*60));
         if(timeout<1)
             throw new BizCodeException(BizCodeEnum.ORDER_TIMEOUT);
-        content.put("timeout_express",Double.valueOf(timeout)+"m");
+        content.put("timeout_express",Double.valueOf(timeout).intValue()+"m");
         content.put("body",payInfoVO.getDescription());
         String form = null;
         try {
             if (payInfoVO.getClientType().equalsIgnoreCase("H5")) {
                 AlipayTradeWapPayRequest request = new AlipayTradeWapPayRequest();
                 request.setBizContent(JSON.toJSONString(content));
-                request.setNotifyUrl(payUrlConfig.getAlipayCallbackUrl());
-                request.setReturnUrl(payUrlConfig.getAlipaySuccessReturnUrl());
+                PayUrlConfig config = new PayUrlConfig();
+                request.setNotifyUrl(config.getAlipayCallbackUrl());
+                request.setReturnUrl(config.getAlipaySuccessReturnUrl());
                 AlipayTradeWapPayResponse res = AlipayConfig.getInstance().pageExecute(request);
                 if (res.isSuccess()) {
                     log.info("Success to invoke alipay sdk. ");

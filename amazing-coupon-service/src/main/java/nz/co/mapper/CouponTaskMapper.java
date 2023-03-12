@@ -1,7 +1,7 @@
 package nz.co.mapper;
 
-import nz.co.model.CouponTaskDO;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import nz.co.model.CouponTaskDO;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;

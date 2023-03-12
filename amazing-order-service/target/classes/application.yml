@@ -54,8 +54,8 @@ mqconfig:
   order_event_exchange: order.event.exchange
   order_close_delay_routing_key: order.close.delay.routing.key
   order_close_routing_key: order.close.routing.key
-  ttl: 15000
+  ttl: 300000
 
 alipay:
   success_return_url: https://xdclass.net
-  callback_url: https://xdclass.net
+  callback_url: https://p0qhk06go6l5.ngrok.xiaomiqiu123.top/api/order/callback/v1/alipay

@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.slf4j.Slf4j;
+import nz.co.component.RabbitMQMessagePostProcessor;
 import nz.co.config.RabbitMqConfig;
 import nz.co.constant.ConstantOnlineClass;
 import nz.co.enums.*;
@@ -20,6 +21,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -121,7 +124,7 @@ public class ProductServiceImpl  implements ProductService {
             ProductRecordMessage productRecordMessage = new ProductRecordMessage();
             productRecordMessage.setProductTaskId(productTaskDO.getId());
             productRecordMessage.setSerialNo(serialNo);
-            rabbitTemplate.convertAndSend(rabbitMqConfig.getStockEventExchange(), rabbitMqConfig.getStockReleaseDelayRoutingKey(), productRecordMessage);
+            rabbitTemplate.convertAndSend(rabbitMqConfig.getStockEventExchange(), rabbitMqConfig.getStockReleaseDelayRoutingKey(), productRecordMessage,new RabbitMQMessagePostProcessor());
             log.info("Send ProductRecordMessage to RabbitMq: " + productRecordMessage);
         }
         return 0;

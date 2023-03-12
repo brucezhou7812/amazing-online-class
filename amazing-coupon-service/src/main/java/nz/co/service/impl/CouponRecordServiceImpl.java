@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.slf4j.Slf4j;
+import nz.co.component.RabbitMQMessagePostProcessor;
 import nz.co.config.RabbitMqConfig;
 import nz.co.enums.BizCodeEnum;
 import nz.co.enums.CouponTaskLockStateEnum;
@@ -108,7 +109,7 @@ public class CouponRecordServiceImpl implements CouponRecordService {
                     CouponRecordMessage couponRecordMessage = new CouponRecordMessage();
                     couponRecordMessage.setCouponTaskId(couponTask.getId());
                     couponRecordMessage.setSerialNum(serialNum);
-                    rabbitTemplate.convertAndSend(rabbitMqConfig.getCouponEventExchange(),rabbitMqConfig.getCouponReleaseDelayRoutingKey(),couponRecordMessage);
+                    rabbitTemplate.convertAndSend(rabbitMqConfig.getCouponEventExchange(),rabbitMqConfig.getCouponReleaseDelayRoutingKey(),couponRecordMessage,new RabbitMQMessagePostProcessor());
                     log.info("coupon record message send successfully: "+couponRecordMessage.toString());
                 }
             });

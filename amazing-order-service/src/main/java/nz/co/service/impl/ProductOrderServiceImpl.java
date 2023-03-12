@@ -4,12 +4,10 @@ import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import nz.co.component.PayTool;
+import nz.co.component.RabbitMQMessagePostProcessor;
 import nz.co.config.RabbitMqConfig;
 import nz.co.constant.ConstantOnlineClass;
-import nz.co.enums.BizCodeEnum;
-import nz.co.enums.CouponUseStateEnum;
-import nz.co.enums.OrderPayTypeEnum;
-import nz.co.enums.OrderStateEnum;
+import nz.co.enums.*;
 import nz.co.exception.BizCodeException;
 import nz.co.feign.AddressFeignService;
 
@@ -25,6 +23,9 @@ import nz.co.utils.CommonUtils;
 import nz.co.utils.JsonData;
 import nz.co.vo.PayInfoVO;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.amqp.AmqpException;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.core.MessagePostProcessor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,13 +88,14 @@ public class ProductOrderServiceImpl implements ProductOrderService {
             this.saveOrderItems(orderItems,productOrderDO);
             ProductOrderMessage productOrderMessage = new ProductOrderMessage();
             productOrderMessage.setSerialNo(serialNo);
-            rabbitTemplate.convertAndSend(rabbitMqConfig.getOrderEventExchange(),rabbitMqConfig.getOrderCloseDelayRoutingKey(),productOrderMessage);
+            rabbitTemplate.convertAndSend(rabbitMqConfig.getOrderEventExchange(), rabbitMqConfig.getOrderCloseDelayRoutingKey(), productOrderMessage, new RabbitMQMessagePostProcessor());
             PayInfoVO payInfoVO = new PayInfoVO();
             payInfoVO.setSerailNo(serialNo);
             payInfoVO.setPayFee(generateOrderRequest.getFeeToPay());
             payInfoVO.setPayType(generateOrderRequest.getPayType());
             payInfoVO.setClientType(generateOrderRequest.getClientType());
             payInfoVO.setTitle(orderItems.get(0).getProductTitle());
+            payInfoVO.setTimeoutMills(ConstantOnlineClass.EXPIRE_TIME_FOR_ORDER_PAYMENT);
             PayTool payTool = new PayTool(payInfoVO);
             String payResult = payTool.pay();
             if(StringUtils.isNotBlank(payResult)) {
@@ -140,6 +142,7 @@ public class ProductOrderServiceImpl implements ProductOrderService {
         productOrderDO.setTotalFee(generateOrderRequest.getTotalFee());
         productOrderDO.setPayType(OrderPayTypeEnum.ALIPAY.name());
         productOrderDO.setState(OrderStateEnum.NEW.name());
+        productOrderDO.setOrderType(OrderTypeEnum.AVERAGE.name());
         productOrderDO.setDel(0);
         productOrderMapper.insert(productOrderDO);
         return productOrderDO;
@@ -172,6 +175,7 @@ public class ProductOrderServiceImpl implements ProductOrderService {
             lockCouponRecordRequest.setSerialNum(serialNo);
             List<Long> couponRecordIds = new ArrayList<>();
             couponRecordIds.add(couponRecordId);
+            lockCouponRecordRequest.setCouponRecordIds(couponRecordIds);
             JsonData<CouponTaskDO> jsonData = couponFeignService.lockCouponRecordBatch(lockCouponRecordRequest);
             if(jsonData.getCode()!=0){
                 throw new BizCodeException(BizCodeEnum.COUPON_LOCK_FAIL);
@@ -220,7 +224,7 @@ public class ProductOrderServiceImpl implements ProductOrderService {
     private boolean validateCoupon(CouponRecordVO couponRecordVO){
         if(couponRecordVO == null)
             return false;
-        if(couponRecordVO.getUseState().equalsIgnoreCase(CouponUseStateEnum.COUPON_NEW.name())){
+        if(couponRecordVO.getUseState().equalsIgnoreCase(CouponUseStateEnum.COUPON_NEW.getDesc())){
             long current = CommonUtils.getTimestamp();
             long start = couponRecordVO.getStartTime().getTime();
             long end = couponRecordVO.getEndTime().getTime();

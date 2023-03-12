@@ -26,7 +26,7 @@
     </sql>
 
     <insert id="insertBatch" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
-        insert into product_order_item (including refid="Base_Column_List_No_Id")
+        insert into product_order_item (<include refid="Base_Column_List_No_Id"/>)
         values
         <foreach collection="productOrderItemDOs" item="item" index="index" separator=",">
             (

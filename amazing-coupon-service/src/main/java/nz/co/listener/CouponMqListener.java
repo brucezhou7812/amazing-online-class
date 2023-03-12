@@ -7,6 +7,7 @@ import nz.co.model.CouponRecordMessage;
 
 import nz.co.service.CouponRecordService;
 
+import nz.co.utils.CommonUtils;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
@@ -27,6 +28,7 @@ public class CouponMqListener {
     public void receiveTestMsg(String testMsg, Message message, Channel channel){
         log.info("Message has been received: "+testMsg);
         long messageTag = message.getMessageProperties().getDeliveryTag();
+        CommonUtils.setTokenToContextHolder(message);
         try {
             channel.basicAck(messageTag,false);
         } catch (IOException e) {
@@ -37,6 +39,7 @@ public class CouponMqListener {
     public void releaseCouponRecord(CouponRecordMessage recordMessage, Message message, Channel channel) throws IOException {
         log.info("Message has been received: "+recordMessage);
         long messageTag = message.getMessageProperties().getDeliveryTag();
+        CommonUtils.setTokenToContextHolder(message);
         boolean flag = couponRecordService.releaseCouponRecord(recordMessage);
         try {
             if (flag) {

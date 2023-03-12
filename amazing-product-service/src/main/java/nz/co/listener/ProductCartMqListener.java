@@ -11,6 +11,7 @@ import nz.co.request.AddCartRequest;
 import nz.co.service.CartService;
 import nz.co.service.CartTaskService;
 import nz.co.service.ProductService;
+import nz.co.utils.CommonUtils;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -34,6 +35,7 @@ public class ProductCartMqListener {
     public void restoreCartItem(OrderItemRequest orderItemRequest, Message message, Channel channel) throws IOException {
         log.info(orderItemRequest+" has been received.");
         long messageTag = message.getMessageProperties().getDeliveryTag();
+        CommonUtils.setTokenToContextHolder(message);
         boolean flag = cartService.restoreCartItem(orderItemRequest);
         try{
             if(flag){

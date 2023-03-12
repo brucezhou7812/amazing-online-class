@@ -2,6 +2,7 @@ package nz.co.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
+import nz.co.component.RabbitMQMessagePostProcessor;
 import nz.co.config.RabbitMqConfig;
 import nz.co.constant.ConstantOnlineClass;
 import nz.co.enums.BizCodeEnum;
@@ -188,7 +189,7 @@ public class CartServiceImpl implements CartService {
                 orderItemRequest.setProductId(productId);
                 orderItemRequest.setBuyNum(obj.getBuyNum());
                 orderItemRequest.setProductTitle(obj.getProductTitle());
-                rabbitTemplate.convertAndSend(rabbitMqConfig.getCartEventExchange(),rabbitMqConfig.getCartReleaseDelayRoutingKey(),orderItemRequest);
+                //rabbitTemplate.convertAndSend(rabbitMqConfig.getCartEventExchange(),rabbitMqConfig.getCartReleaseDelayRoutingKey(),orderItemRequest,new RabbitMQMessagePostProcessor());
                 this.insertCartTask(obj,serialNo);
                 this.deleteItem(productId);
                 return true;

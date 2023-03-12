@@ -1,8 +1,6 @@
 package nz.co.service;
 
 import nz.co.model.CouponTaskDO;
-import com.baomidou.mybatisplus.extension.service.IService;
-import nz.co.utils.JsonData;
 
 /**
  * <p>

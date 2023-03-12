@@ -10,6 +10,7 @@ import nz.co.request.AddCartRequest;
 import nz.co.service.CartService;
 import nz.co.service.CartTaskService;
 import nz.co.service.ProductService;
+import nz.co.utils.CommonUtils;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -29,6 +30,7 @@ public class ProductStockMqListener {
     public void releaseProductStock(ProductRecordMessage recordMessage, Message message, Channel channel) throws IOException {
         log.info("Message has been received: "+recordMessage);
         long messageTag = message.getMessageProperties().getDeliveryTag();
+        CommonUtils.setTokenToContextHolder(message);
         boolean flag = productService.releaseStock(recordMessage);
         try {
             if (flag) {

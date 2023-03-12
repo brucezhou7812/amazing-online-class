@@ -4,23 +4,21 @@ import lombok.extern.slf4j.Slf4j;
 import nz.co.enums.OrderPayTypeEnum;
 import nz.co.vo.PayInfoVO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.stereotype.Component;
 
 @Slf4j
 public class PayTool {
-    @Autowired
-    private AliPayService aliPayService;
-    @Autowired
-    private WeChatPayService weChatPayService;
     private PayService payService;
     private PayContext payContext;
 
     public PayTool(PayInfoVO payInfoVO){
         if(OrderPayTypeEnum.ALIPAY.name().equalsIgnoreCase(payInfoVO.getPayType())){
-            payService = aliPayService;
+            payService = new AliPayService();
         }else if(OrderPayTypeEnum.WECHAT.name().equalsIgnoreCase(payInfoVO.getPayType())){
-            payService = weChatPayService;
+            payService = new WeChatPayService();
         }else{
-            payService = aliPayService;
+            payService = new AliPayService();
         }
         payContext = new PayContext(payService,payInfoVO);
     }

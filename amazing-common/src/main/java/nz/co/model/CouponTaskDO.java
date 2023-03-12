@@ -1,10 +1,13 @@
 package nz.co.model;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
 import java.util.Date;
 import com.baomidou.mybatisplus.annotation.TableId;
 import java.io.Serializable;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -29,6 +32,7 @@ public class CouponTaskDO implements Serializable {
     /**
      * coupon id
      */
+    @TableField(value="coupon_record_id")
     private Long couponRecordId;
 
     /**

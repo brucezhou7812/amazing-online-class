@@ -2,7 +2,12 @@ package nz.co.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import nz.co.component.RabbitRequestAttributes;
+import nz.co.constant.ConstantOnlineClass;
 import nz.co.enums.BizCodeEnum;
+import org.apache.commons.lang.StringUtils;
+import org.springframework.amqp.core.Message;
+import org.springframework.web.context.request.RequestContextHolder;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -138,5 +143,20 @@ public class CommonUtils {
         }
         return null;
 
+    }
+    public static boolean setTokenToContextHolder(Message message){
+        if(message == null){
+            log.warn("setTokenToContextHolder failed: message is null");
+            return false;
+        }
+        String token = message.getMessageProperties().getHeader(ConstantOnlineClass.TOKEN);
+        if(StringUtils.isBlank(token)){
+            log.warn("setTokenToContextHolder failed: token is null");
+            return false;
+        }
+        RabbitRequestAttributes rra = new RabbitRequestAttributes();
+        rra.setAttribute(ConstantOnlineClass.TOKEN,token,0);
+        RequestContextHolder.setRequestAttributes(rra);
+        return true;
     }
 }
