@@ -15,6 +15,7 @@ import nz.co.enums.BizCodeEnum;
 import nz.co.enums.OrderClientTypeEnum;
 import nz.co.enums.OrderPayTypeEnum;
 import nz.co.request.GenerateOrderRequest;
+import nz.co.request.RepayOrderRequest;
 import nz.co.service.ProductOrderService;
 import nz.co.utils.CommonUtils;
 import nz.co.utils.JsonData;
@@ -98,6 +99,40 @@ public class ProductOrderController {
                                                @ApiParam(value="The state of order")@RequestParam(value="state",required = false)String state){
         return productOrderService.page(page,size,state);
     }
+
+    @PostMapping("repay")
+    @ApiOperation(("repay the order"))
+    public void repay(@ApiParam(value="repay order request")@RequestBody RepayOrderRequest repayOrderRequest,HttpServletResponse response){
+        JsonData jsonData = productOrderService.repay(repayOrderRequest);
+        if(jsonData.getCode() == 0){
+            String payType = repayOrderRequest.getPayType();
+            String clientType = repayOrderRequest.getClientType();
+            if(payType.equalsIgnoreCase(OrderPayTypeEnum.ALIPAY.name())){
+                log.info("PayType is :"+payType);
+                if(clientType.equalsIgnoreCase(OrderClientTypeEnum.H5.name())){
+                    log.info("ClientType is :"+clientType);
+                    writeData(jsonData,response);
+                }else{
+                    log.info("ClientType is :"+clientType);
+                }
+
+            }else if(payType.equalsIgnoreCase(OrderPayTypeEnum.WECHAT.name())){
+                log.info("PayType is :"+payType);
+            }else{
+                log.info("PayType is :"+payType);
+            }
+        }else{
+            log.error("repay failed.");
+        }
+    }
+
+    @PostMapping("get_token")
+    @ApiOperation("Get order token")
+    public JsonData<String> getOrderToken(){
+        JsonData<String> jsonData = productOrderService.getOrderToken();
+        return jsonData;
+    }
+
     @GetMapping("testAlipay")
     public void testAlipay(HttpServletResponse response) throws AlipayApiException, IOException {
         HashMap<String,String> content = new HashMap<>();

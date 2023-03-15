@@ -11,6 +11,7 @@ public class ConstantOnlineClass {
     public static final String PAGINATION_TOTAL_RECORDS = "total_record";
     public static final String PAGINATION_CURRENT_DATA = "current_data";
     public static final String KEY_IN_REDIS_CART="ProductService:cart:%s";
+    public static final String KEY_IN_REDIS_ORDER_TOKEN="ProductService:order:token:%s";
     public static final String RABBITMQ_X_DEAD_LETTER_EXCHANGE="x-dead-letter-exchange";
     public static final String RABBITMQ_X_DEAD_LETTER_ROUTING_KEY="x-dead-letter-routing-key";
     public static final String RABBITMQ_X_MESSAGE_TTL="x-message-ttl";

@@ -67,7 +67,11 @@ public enum BizCodeEnum {
     ORDER_CONFIRM_FAILED(830003,"Confirm order failed"),
     ORDER_TIMEOUT(830004,"Order has been expired"),
     ORDER_PAID_FAILED(830006,"Order Paid Failed"),
-    ORDER_CALLBACK_FAILED(830005,"Order callback failed");
+    ORDER_CALLBACK_FAILED(830005,"Order callback failed"),
+    ORDER_STATE_INVALID(830007,"Order state invalid"),
+    ORDER_TOKEN_TIMEOUT(830008,"Order token expired"),
+    ORDER_TOKEN_INVALID(830009,"order token invalid"),
+    ORDER_TOKEN_NOT_EXIST(830009,"order token not exist");
 
     @Getter
     @Setter

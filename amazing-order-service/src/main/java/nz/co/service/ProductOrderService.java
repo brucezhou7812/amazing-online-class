@@ -2,6 +2,7 @@ package nz.co.service;
 
 import nz.co.enums.OrderPayTypeEnum;
 import nz.co.request.GenerateOrderRequest;
+import nz.co.request.RepayOrderRequest;
 import nz.co.utils.JsonData;
 import nz.co.model.ProductOrderVO;
 
@@ -26,4 +27,8 @@ public interface ProductOrderService{
     JsonData handleOrderCallback(OrderPayTypeEnum alipay, Map<String, String> params);
 
     JsonData<ProductOrderVO> page(int page, int size, String state);
+
+    JsonData repay(RepayOrderRequest repayOrderRequest);
+
+    JsonData<String> getOrderToken();
 }

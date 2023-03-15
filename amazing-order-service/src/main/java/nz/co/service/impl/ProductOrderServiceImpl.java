@@ -21,6 +21,7 @@ import nz.co.mapper.ProductOrderItemMapper;
 import nz.co.model.*;
 import nz.co.mapper.ProductOrderMapper;
 import nz.co.request.GenerateOrderRequest;
+import nz.co.request.RepayOrderRequest;
 import nz.co.service.ProductOrderService;
 import nz.co.utils.CommonUtils;
 import nz.co.utils.JsonData;
@@ -32,10 +33,15 @@ import org.springframework.amqp.core.MessagePostProcessor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import springfox.documentation.spring.web.json.Json;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -64,11 +70,24 @@ public class ProductOrderServiceImpl implements ProductOrderService {
     private RabbitMqConfig rabbitMqConfig;
     @Autowired
     private RabbitTemplate rabbitTemplate;
+    @Autowired
+    private StringRedisTemplate redisTemplate;
     @Override
+    @Transactional
     public JsonData generateOrder(GenerateOrderRequest generateOrderRequest) {
         UserLoginModel userLoginModel = LoginInterceptor.threadLocalUserLoginModel.get();
         if(userLoginModel == null){
             return JsonData.buildResult(BizCodeEnum.ACCOUNT_NOT_LOGIN);
+        }
+        String token = generateOrderRequest.getToken();
+        if(StringUtils.isBlank(token)){
+            throw new BizCodeException(BizCodeEnum.ORDER_TOKEN_NOT_EXIST);
+        }
+        String script = "if redis.call('get',KEYS[1]) == ARGV[1] then return redis.call('del',KEYS[1]) else return 0 end";
+        String key = String.format(ConstantOnlineClass.KEY_IN_REDIS_ORDER_TOKEN,userLoginModel.getId());
+        Long result = redisTemplate.execute(new DefaultRedisScript<>(script,Long.class),Arrays.asList(key),token);
+        if(result == 0L){
+            throw new BizCodeException(BizCodeEnum.ORDER_TOKEN_INVALID);
         }
         Long addressId = generateOrderRequest.getAddressId();
         AddressVO addressVO = this.getUserAddress(addressId);
@@ -304,6 +323,7 @@ public class ProductOrderServiceImpl implements ProductOrderService {
         return JsonData.buildResult(BizCodeEnum.ORDER_CALLBACK_FAILED);
     }
 
+
     @Override
     public JsonData page(int page, int size, String state) {
         UserLoginModel userLoginModel = LoginInterceptor.threadLocalUserLoginModel.get();
@@ -338,6 +358,55 @@ public class ProductOrderServiceImpl implements ProductOrderService {
         pageMap.put(ConstantOnlineClass.PAGINATION_CURRENT_DATA,productOrderVOList);
 
         return JsonData.buildSuccess(pageMap);
+    }
+
+    @Override
+    @Transactional
+    public JsonData repay(RepayOrderRequest repayOrderRequest) {
+        UserLoginModel userLoginModel = LoginInterceptor.threadLocalUserLoginModel.get();
+        ProductOrderDO productOrderDO = productOrderMapper.selectOne(new QueryWrapper<ProductOrderDO>()
+        .eq("user_id",userLoginModel.getId())
+        .eq("out_trade_no",repayOrderRequest.getSerialNo()));
+        if(productOrderDO == null){
+            log.error("Order does not exist, serial no is :"+repayOrderRequest.getSerialNo());
+            return JsonData.buildResult(BizCodeEnum.ORDER_NOT_EXIST);
+        }
+        if(!productOrderDO.getState().equalsIgnoreCase(OrderStateEnum.NEW.name())){
+            log.error("Order state is invalid, State: "+productOrderDO.getState()+" serial no is :"+repayOrderRequest.getSerialNo());
+            return JsonData.buildResult(BizCodeEnum.ORDER_STATE_INVALID);
+        }
+
+        long timeElapse = CommonUtils.getTimestamp()-productOrderDO.getCreateTime().getTime();
+        long timeTogo = timeElapse + 70*1000;
+        if(timeTogo > ConstantOnlineClass.EXPIRE_TIME_FOR_ORDER_PAYMENT){
+            log.error("Order is expired, serial no is :"+repayOrderRequest.getSerialNo());
+            return JsonData.buildResult(BizCodeEnum.ORDER_TIMEOUT);
+        }
+        PayInfoVO payInfoVO = new PayInfoVO();
+        payInfoVO.setSerailNo(productOrderDO.getOutTradeNo());
+        payInfoVO.setPayFee(productOrderDO.getPayFee());
+        payInfoVO.setPayType(repayOrderRequest.getPayType());
+        payInfoVO.setClientType(repayOrderRequest.getClientType());
+        payInfoVO.setTitle(productOrderDO.getNickname());
+        payInfoVO.setTimeoutMills(ConstantOnlineClass.EXPIRE_TIME_FOR_ORDER_PAYMENT-timeTogo);
+        PayTool payTool = new PayTool(payInfoVO);
+        String payResult = payTool.pay();
+        if(StringUtils.isNotBlank(payResult)) {
+            log.info("Alipay success");
+            return JsonData.buildSuccess(payResult);
+        }else{
+            log.error("Alipay failed");
+            return JsonData.buildResult(BizCodeEnum.ORDER_PAID_FAILED);
+        }
+    }
+
+    @Override
+    public JsonData<String> getOrderToken() {
+        UserLoginModel userLoginModel = LoginInterceptor.threadLocalUserLoginModel.get();
+        String key = String.format(ConstantOnlineClass.KEY_IN_REDIS_ORDER_TOKEN,userLoginModel.getId());
+        String token = CommonUtils.getRandomCode(32);
+        redisTemplate.opsForValue().set(key,token,30, TimeUnit.MINUTES);
+        return JsonData.buildSuccess(token);
     }
 
     private ProductOrderVO beanProcess(ProductOrderDO productOrderDO){
