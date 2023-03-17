@@ -1,7 +1,6 @@
 package nz.co.controller;
 
 import com.google.code.kaptcha.Producer;
-import com.sun.javafx.iio.ios.IosImageLoader;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
