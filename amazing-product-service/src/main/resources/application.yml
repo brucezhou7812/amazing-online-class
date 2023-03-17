@@ -1,63 +1,63 @@
-server:
-  port: 9092
-spring:
-  application:
-    name: amazing-product-service
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/amazing_product?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-    username: root
-    password: 12345678
-  redis:
-    host: 47.92.171.110
-    port: 8000
-    password: 123456
-  mail:
-    host: smtp.189.cn
-    password: Lf=3Qm!7x)9Jo*3E
-    username: 18911717812@189.cn
-    from: 18911717812@189.cn
-    properties.mail.smtp.starttls.enable: true
-    properties.mail.smtp.starttls.required: true
-    properties.mail.smtp.ssl.enable: true
-    default-encoding: UTF-8
-  cloud:
-    nacos:
-      discovery:
-        server-addr: 47.92.171.110:8848
-  rabbitmq:
-    host: 47.92.171.110
-    port: 5672
-    virtual-host: /
-    password: 123456
-    username: admin
-    listener:
-      simple:
-        acknowledge-mode: manual
-aliyun:
-  oss:
-    endpoint: oss-cn-zhangjiakou.aliyuncs.com
-    access-key-id: LTAI5tMZyJFkTDVMi67yiGJB
-    access-key-sercret: KiXVB9SkKGL2dMp4sMTGL2cCzRY3FB_b@$B
-    bucketname: onlineclass-bucket
-
-mybatis-plus:
-  configuration:
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-logging:
-  level:
-    root: INFO
-
-mqconfig:
-  stock_release_delay_queue: stock.release.delay_queue
-  cart_release_delay_queue: cart.release.delay_queue
-  stock_release_queue: stock.release.queue
-  cart_release_queue: cart.release.queue
-  stock_event_exchange: stock.event.exchange
-  cart_event_exchange: cart.event.exchange
-  stock_release_delay_routing_key: stock.release.delay.routing.key
-  cart_release_delay_routing_key: cart.release.delay.routing.key
-  stock_release_routing_key: stock.release.routing.key
-  cart_release_routing_key: cart.release.routing.key
-  stock_ttl: 360000
-  cart_ttl: 360000
+#server:
+#  port: 9092
+#spring:
+#  application:
+#    name: amazing-product-service
+#  datasource:
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+#    url: jdbc:mysql://localhost:3306/amazing_product?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+#    username: root
+#    password: 12345678
+#  redis:
+#    host: 47.92.171.110
+#    port: 8000
+#    password: 123456
+#  mail:
+#    host: smtp.189.cn
+#    password: Lf=3Qm!7x)9Jo*3E
+#    username: 18911717812@189.cn
+#    from: 18911717812@189.cn
+#    properties.mail.smtp.starttls.enable: true
+#    properties.mail.smtp.starttls.required: true
+#    properties.mail.smtp.ssl.enable: true
+#    default-encoding: UTF-8
+#  cloud:
+#    nacos:
+#      discovery:
+#        server-addr: 47.92.171.110:8848
+#  rabbitmq:
+#    host: 47.92.171.110
+#    port: 5672
+#    virtual-host: /
+#    password: 123456
+#    username: admin
+#    listener:
+#      simple:
+#        acknowledge-mode: manual
+#aliyun:
+#  oss:
+#    endpoint: oss-cn-zhangjiakou.aliyuncs.com
+#    access-key-id: LTAI5tMZyJFkTDVMi67yiGJB
+#    access-key-sercret: KiXVB9SkKGL2dMp4sMTGL2cCzRY3FB_b@$B
+#    bucketname: onlineclass-bucket
+#
+#mybatis-plus:
+#  configuration:
+#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+#logging:
+#  level:
+#    root: INFO
+#
+#mqconfig:
+#  stock_release_delay_queue: stock.release.delay_queue
+#  cart_release_delay_queue: cart.release.delay_queue
+#  stock_release_queue: stock.release.queue
+#  cart_release_queue: cart.release.queue
+#  stock_event_exchange: stock.event.exchange
+#  cart_event_exchange: cart.event.exchange
+#  stock_release_delay_routing_key: stock.release.delay.routing.key
+#  cart_release_delay_routing_key: cart.release.delay.routing.key
+#  stock_release_routing_key: stock.release.routing.key
+#  cart_release_routing_key: cart.release.routing.key
+#  stock_ttl: 360000
+#  cart_ttl: 360000

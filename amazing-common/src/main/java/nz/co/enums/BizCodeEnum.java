@@ -40,6 +40,12 @@ public enum BizCodeEnum {
     COUPON_RECORD_CONFIRM_FAILED(2990002,"Coupon Record confirm failed"),
     COUPON_RECORD_INVALIDE(290003,"Coupon Record Invalid"),
     COUPON_RECORD_DO_NOT_MEET_PRICE_CONDITION(290004,"Coupon does not meet price condition"),
+
+    SENTINEL_FLOW_LIMITING(310001,"Sentinel flow limiting"),
+    SENTINEL_DEGRADE(310002,"Sentinel flow degrade"),
+    SENTINEL_PARAM_FLOW(310003,"sentinel param flow exception"),
+    SENTINEL_SYSTEM_BLOCK(310004,"Sentinel system blocking"),
+    SENTINEL_AUTHORITY_EXCEPTION(310005,"Sentinel authority exception"),
     /**
      * File error
      */
